@@ -8,7 +8,7 @@ import pandas as pd
 TIME_COLUMN = 'TimeStamp'
 INTERPOLABLE_COLUMNS = ['vx', 'vy', 'vz', 'vyaw']
 IMAGE_COLUMNS = [TIME_COLUMN, 'ImageFile']
-RESULT_COLUMNS = [TIME_COLUMN] + INTERPOLABLE_COLUMNS + ['ImageFile']
+RESULT_COLUMNS = INTERPOLABLE_COLUMNS + ['ImageFile']
 
 
 def get_abspath(filename):
