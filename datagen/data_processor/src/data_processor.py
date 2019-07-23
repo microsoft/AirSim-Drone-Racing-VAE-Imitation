@@ -36,9 +36,6 @@ def interpolate_record(record1, record2, image_record):
         interpolated_record[col] = interpolate(
             record1[col], record2[col], t)
 
-    for col in IMAGE_COLUMNS:
-        interpolated_record[col] = image_record[col]
-
     return interpolated_record
 
 
@@ -56,7 +53,17 @@ def find_closest_rows(value, iterator):
     return v1, v2
 
 
-def process(velocities, images, result_file_path):
+def create_image_path(image_file_name, image_folder_path):
+    return os.path.abspath(os.path.join(image_folder_path, image_file_name))
+
+
+def process(
+    velocities,
+    images,
+    result_velocities_file_path,
+    result_images_file_path,
+    images_folder_path
+):
     """
     Process velocities and images frames.
     For each row in images:
@@ -65,51 +72,64 @@ def process(velocities, images, result_file_path):
            vt1, vt2: velocity records timestamps
         3) Interpolate velocities values using t.
         4) Create new row using image timestamp, image and interpolated values.
-    :param velocities: pd.DataFrame
-    :param images: pd.DataFrame
     """
     velocity_iterator = velocities.iterrows()
-    f = open(result_file_path, 'w+')
-    writer = csv.DictWriter(f, RESULT_COLUMNS, delimiter=',')
-    writer.writeheader()
+    f_velocities = open(result_velocities_file_path, 'w+')
+    f_images = open(result_images_file_path, 'w+')
+    writer_v = csv.DictWriter(f_velocities, RESULT_COLUMNS, delimiter=',')
+    writer_i = csv.DictWriter(f_images, ['ImageFile'], delimiter=',')
 
     for _, image_row in images.iterrows():
         v1, v2 = find_closest_rows(image_row[TIME_COLUMN], velocity_iterator)
         if v1 is None or v2 is None:
             continue
-        writer.writerow(interpolate_record(v1, v2, image_row))
+        interpolated = interpolate_record(v1, v2, image_row)
+        writer_v.writerow(interpolated)
+        writer_i.writerow({
+            'ImageFile': create_image_path(
+                image_row['ImageFile'],
+                images_folder_path
+        )})
 
-    f.close()
+    f_velocities.close()
+    f_images.close()
 
 
-def run(velocities_file_path, images_file_path, result_file_path):
+def run(
+    velocities_file_path,
+    images_file_path,
+    result_velocities_file_path,
+    result_images_file_path,
+    images_folder_path,
+):
     velocities = pd.read_csv(velocities_file_path, delimiter=', ')
     images = pd.read_csv(
         images_file_path, delimiter=', ')
 
-    process(velocities, images, result_file_path)
+    process(
+        velocities,
+        images,
+        result_velocities_file_path,
+        result_images_file_path,
+        images_folder_path
+    )
     print('------------------------------------')
-    print('Successfully written the result to: ', result_file_path)
+    print('Successfully created the results!')
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("velocity", help="Path to the velocities file")
     parser.add_argument("images", help="Path to the images file")
-    parser.add_argument("result", help="Path to the result file")
     parser.add_argument(
-        "-rel",
-        "--relative",
-        help="Enable relative paths to load "
-             "files from the folder where this script is located",
-        action="store_true"
-    )
+        "result_velocities", help="Path to the result velocities file")
+    parser.add_argument("result_images", help="Path to the result images file")
+    parser.add_argument("images_folder", help="Path to the images folder")
     args = parser.parse_args()
-    if args.relative:
-        run(
-            get_abspath(args.velocity),
-            get_abspath(args.images),
-            get_abspath(args.result)
-        )
-    else:
-        run(args.velocity, args.images, args.result)
+    run(
+        args.velocity,
+        args.images,
+        args.result_velocities,
+        args.result_images,
+        args.images_folder
+    )
