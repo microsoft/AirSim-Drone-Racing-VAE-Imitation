@@ -26,15 +26,16 @@ class GatePoseGenerator(object):
         return list(zip(samples, derivatives))
 
     def generate_circle(self, i, num_gates, race_course_radius):
-        ts = [t / (num_gates - 1) for t in range(0, num_gates)]
+        # ts = [t / (num_gates - 1) for t in range(0, num_gates)]
+        ts = [t / (num_gates) for t in range(0, num_gates)]
         samples = [0 for t in ts]
         derivatives = [0 for t in ts]
 
         prev_radius = None
 
         # min_radius = race_course_radius - 15.0
-        min_radius = race_course_radius - 2.0
-        max_radius = race_course_radius + 2.0
+        min_radius = race_course_radius + 4.0
+        max_radius = race_course_radius - 4.0
         max_radius_delta = 5.0
 
         radius_list = [random.uniform(min_radius, max_radius) for t in ts]
@@ -100,7 +101,7 @@ class GatePoseGenerator(object):
             # todo un-hardcode
             gate_poses = [\
                             airsim.Pose(\
-                            airsim.Vector3r((x_t[t_i][0] - x_t[0][0] - 4.0), (y_t[t_i][0] - y_t[0][0] - 4.0), random.uniform(-5.0, -5.5)),\
+                            airsim.Vector3r((x_t[t_i][0] - x_t[0][0] - 4.0), (y_t[t_i][0] - y_t[0][0] - 4.0), random.uniform(-5.0, -9.0)),\
                             self.quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1])\
                           )\
                         for t_i in range(0, num_gates)]
@@ -112,7 +113,7 @@ class DroneRacingDataGenerator(object):
     def __init__(self, 
                 drone_name = "drone_0",
                 gate_passed_thresh = 2.0,
-                race_course_radius = 25.0,
+                race_course_radius = 30.0,
                 odom_loop_rate_sec = 0.015):
 
         self.curr_track_gate_poses = None
@@ -229,7 +230,7 @@ class DroneRacingDataGenerator(object):
                 # self.fly_to_next_gate_with_moveToPostion()
 
     def fly_to_next_gate_with_moveOnSpline(self):
-        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=10.0, acc_max=5.0, vehicle_name=self.drone_name)
+        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=25.0, acc_max=15.0, vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
     def join_all_pending_futures(self):
@@ -239,8 +240,8 @@ class DroneRacingDataGenerator(object):
         # todo enable gate spawning in neurips environments for variable number of gates in training laps
         # self.next_track_gate_poses = self.track_generator.generate_gate_poses(num_gates=random.randint(6,10), race_course_radius=30.0, type_of_segment = "circle")
         return self.track_generator.generate_gate_poses(num_gates=len(self.curr_track_gate_poses), \
-                                                                                    race_course_radius=self.race_course_radius, \
-                                                                                    type_of_segment = "circle")
+                                                            race_course_radius=self.race_course_radius, \
+                                                            type_of_segment = "circle")
 
     def set_pose_of_gate_just_passed(self):
         if (self.last_gate_passed_idx == -1):
