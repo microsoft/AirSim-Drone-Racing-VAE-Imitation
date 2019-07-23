@@ -8,12 +8,21 @@ import pandas as pd
 TIME_COLUMN = 'TimeStamp'
 INTERPOLABLE_COLUMNS = ['vx', 'vy', 'vz', 'vyaw']
 IMAGE_COLUMNS = [TIME_COLUMN, 'ImageFile']
-RESULT_COLUMNS = INTERPOLABLE_COLUMNS + ['ImageFile']
+RESULT_COLUMNS = INTERPOLABLE_COLUMNS
 
 
 def get_abspath(filename):
     return os.path.abspath(
         os.path.join(os.path.dirname(__file__), './{}'.format(filename)))
+
+
+def create_image_path(image_file_name, image_folder_path):
+    return os.path.abspath(os.path.join(image_folder_path, image_file_name))
+
+
+def create_suffixed_file(file_path, suffix):
+    _path, _format = file_path.split('.')
+    return '{}_{}.{}'.format(_path, suffix, _format)
 
 
 def interpolate(v0, v1, t):
@@ -53,8 +62,25 @@ def find_closest_rows(value, iterator):
     return v1, v2
 
 
-def create_image_path(image_file_name, image_folder_path):
-    return os.path.abspath(os.path.join(image_folder_path, image_file_name))
+def split_test_training_data(file_paths, lines_number, test_split=0.2):
+    test_number = int(lines_number * test_split)
+    for file_path in file_paths:
+        f = open(file_path, 'r')
+        f_test = open(create_suffixed_file(file_path, 'test'), 'w')
+        f_train = open(create_suffixed_file(file_path, 'train'), 'w')
+
+        i = 0
+        for line in f.readlines():
+            if i <= test_number:
+                f_test.writelines(line)
+            else:
+                f_train.writelines(line)
+            i += 1
+
+        f.close()
+        f_train.close()
+        f_test.close()
+        os.remove(file_path)
 
 
 def process(
@@ -78,21 +104,27 @@ def process(
     f_images = open(result_images_file_path, 'w+')
     writer_v = csv.DictWriter(f_velocities, RESULT_COLUMNS, delimiter=',')
     writer_i = csv.DictWriter(f_images, ['ImageFile'], delimiter=',')
+    row_counter = 0
 
     for _, image_row in images.iterrows():
         v1, v2 = find_closest_rows(image_row[TIME_COLUMN], velocity_iterator)
         if v1 is None or v2 is None:
             continue
         interpolated = interpolate_record(v1, v2, image_row)
+        row_counter += 1
         writer_v.writerow(interpolated)
         writer_i.writerow({
             'ImageFile': create_image_path(
                 image_row['ImageFile'],
                 images_folder_path
-        )})
+            )
+        })
 
     f_velocities.close()
     f_images.close()
+
+    split_test_training_data(
+        [result_velocities_file_path, result_images_file_path], row_counter)
 
 
 def run(

@@ -9,6 +9,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Actor(nn.Module):
     """ Actor model used by the imitator"""
     def __init__(self, state_dim, action_dim):
+        """
+
+        Args:
+            state_dim: H x W x C
+            action_dim: N
+        """
         super(Actor, self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(state_dim[2], 32, kernel_size=3),
@@ -22,11 +28,11 @@ class Actor(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
-        self.fc = nn.Linear(7 * 7 * 32, action_dim)
+        self.fc = nn.Linear(64 * 34 * 62, action_dim)
 
     def forward(self, obs):
         out = self.layer1(obs)
-        out = self.layer2(obs)
+        out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
         out = self.fc(out)
         # TODO @praveen-palanisamy: Clamp/scale appropriately
@@ -49,11 +55,11 @@ class Discriminator(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
-        self.fc = nn.Linear(7 * 7 * 32 + action_dim, 1)
+        self.fc = nn.Linear(64 * 34 * 62 + action_dim, 1)
 
     def forward(self, obs, action):
         out = self.layer1(obs)
-        out = self.layer2(obs)
+        out = self.layer2(out)
         out = out.reshape(out.size(0), -1)
         out = torch.cat([out, action], 1)
         out = self.fc(out)
@@ -96,12 +102,12 @@ class Imitator(object):
         for i in range(num_iter):
             # Sample from the demonstrator
             demo_state, demo_action = self.demonstrator.sample(batch_size)
-            demo_state = torch.FloatTensor(demo_state).to(device)
-            demo_action = torch.FloatTensor(demo_action).to(device)
+            demo_state = demo_state.to(device)
+            demo_action = demo_action.to(device)
 
             # Sample from the actor
             state, gt_action = self.demonstrator.sample(batch_size)
-            state = torch.FloatTensor(state).to(device)
+            state = state.to(device)
             actor_action = self.actor(state)
 
             # Prepare targets for learning
@@ -110,7 +116,7 @@ class Imitator(object):
 
             # Update Discriminator
             prob_demonstrator = self.discriminator(demo_state, demo_action)
-            prob_actor = self.discriminator(state, actor_action)
+            prob_actor = self.discriminator(state, actor_action.detach())
 
             loss_demonstrator = self.loss(prob_demonstrator,
                                           target_demonstrator)

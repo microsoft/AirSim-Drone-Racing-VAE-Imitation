@@ -241,8 +241,12 @@ class DroneRacingDataGenerator(object):
                 # self.fly_to_next_gate_with_learner()
                 # self.fly_to_next_gate_with_moveToPostion()
 
+    def set_moveOnSpline_limits(self, vel_max=20.0, acc_max=10.0):
+        self.vel_max = vel_max
+        self.acc_max = acc_max
+
     def fly_to_next_gate_with_moveOnSpline(self):
-        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=25.0, acc_max=15.0, vehicle_name=self.drone_name)
+        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=self.vel_max, acc_max=self.acc_max, vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
     def join_all_pending_futures(self):
@@ -288,29 +292,10 @@ class DroneRacingDataGenerator(object):
                 print("last_gate_passed_idx", self.last_gate_passed_idx, "moving gate idx from NEXT track", gate_idx_to_move)
                 self.client.simSetObjectPose(self.gate_object_names_sorted[gate_idx_to_move], self.next_track_gate_poses[gate_idx_to_move])
 
-        # print(self.last_gate_passed_idx)
-        # print(self.gate_object_names_sorted)
-        # print(self.next_track_gate_poses)
-        # self.client.simSetObjectPose(self.gate_object_names_sorted[gate_idx_to_move], self.next_track_gate_poses[gate_idx_to_move])
         # todo unhardcode 100+, ensure unique object ids or just set all non-gate objects to 0, and gates to range(self.next_track_gate_poses)... not needed for hackathon
         # self.client.simSetSegmentationObjectID(self.gate_object_names_sorted[self.last_gate_passed_idx], 100+self.last_gate_passed_idx);
         # todo do we really need this sleep
         time.sleep(0.05)  
-
-    # def spawn_gate_at_gate_just_passed(self):
-    #     # last_spawned_gates = self.client.simListSceneObjects(".*spawned.*")
-    #     # for spawned_gate in last_spawned_gates:
-    #         # self.client.simDestroyObject(spawned_gate)
-    #         # time.sleep(0.05) # todo 
-
-    #     for (idx, gate_pose) in enumerate(self.curr_track_gate_poses):
-    #         # gate_name = "spawned_gate_" + str(idx)
-    #         # self.client.simSpawnObject(gate_name, "DroneGate16x16", gate_pose, 1.0)
-    #         self.client.simSetObjectPose(gate_name, gate_pose)
-    #         # todo generate binary segmentation img
-    #         self.client.simSetSegmentationObjectID(gate_name, 100+idx);
-    #         # todo do we really need this sleep
-    #         time.sleep(0.05)  
 
     def start_expert_planner_controller_thread(self):
         if not self.is_expert_planner_controller_thread_active:
@@ -327,9 +312,10 @@ class DroneRacingDataGenerator(object):
     def set_num_training_laps(self, num_training_laps):
         self.num_training_laps = num_training_laps
 
-    def start_training_data_generator(self, num_training_laps=10, level_name='Soccer_Field_Easy'):
+    def start_training_data_generator(self, num_training_laps=100, level_name='Soccer_Field_Easy'):
         self.load_level(level_name)
         # todo encapsulate in functions
+        self.set_moveOnSpline_limits(vel_max=20.0, acc_max=10.0)
         self.client.enableApiControl(True, vehicle_name=self.drone_name)
         time.sleep(0.01)
         self.client.armDisarm(True, vehicle_name=self.drone_name)
