@@ -1,5 +1,10 @@
 from __future__ import division
 import random
+import os,sys
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+airsim_path = os.path.join(curr_dir, '..', 'airsim')
+sys.path.insert(0, airsim_path)
+import setup_path
 import airsim
 import airsim.types
 import airsim.utils
@@ -144,13 +149,20 @@ class DroneRacingDataGenerator(object):
         self.got_odom = False
         self.is_expert_planner_controller_thread_active = False
         self.expert_planner_controller_thread = threading.Thread(target=self.repeat_timer_expert, args=(self.expert_planner_controller_callback, odom_loop_rate_sec))
-        # self.image_loop = threading.Thread(target=self.repeat_timer, args=(self.image_callback), 0.05))
+        # self.image_loop = threading.Thread(target=self.repeat_timer, args=(self.image_callback, 0.05))
 
+    # def image_callback(self):
+    #     self.client.()
 
     def repeat_timer_expert(self, task, period):
         while self.is_expert_planner_controller_thread_active:
             task()
             time.sleep(period)
+
+    # def repeat_timer_image_cb(self, task, period):
+    #     while self.is_expert_planner_controller_thread_active:
+    #         task()
+            # time.sleep(period)
 
     def load_level(self, level_name='Soccer_Field_Easy'):
         self.client.simLoadLevel(level_name)
