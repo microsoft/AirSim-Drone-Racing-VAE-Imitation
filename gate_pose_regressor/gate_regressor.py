@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import numpy as np
 from regressor_model import Regressor
-import utils
+import utils_reg
 
 
 class GateRegressor():
@@ -53,11 +53,11 @@ class GateRegressor():
         return predictions
 
     def calc_global_gate_pose(self, p_o_b, relative_pose):
-        r = relative_pose[0]
-        theta = relative_pose[1]
-        psi = relative_pose[2]
-        phi_rel = relative_pose[3]
+        r = relative_pose[0,0]
+        theta = relative_pose[0,1]
+        psi = relative_pose[0,2]
+        phi_rel = relative_pose[0,3]
         # get relative vector in the base frame
-        t_b_g = utils.polarTranslation(r, theta, psi)
-        p_o_g = utils.convert_gate_base2world(p_o_b, t_b_g, phi_rel)
+        t_b_g = utils_reg.polarTranslation(r, theta, psi)
+        p_o_g = utils_reg.convert_gate_base2world(p_o_b, t_b_g, phi_rel)
         return p_o_g

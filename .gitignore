@@ -7,3 +7,4 @@ airsim/*pyc
 *.png
 *.zip
 datagen/data_loader/data
+datagen/data_processor/data

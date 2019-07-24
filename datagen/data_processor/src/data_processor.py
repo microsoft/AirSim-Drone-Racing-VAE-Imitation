@@ -21,8 +21,8 @@ def create_image_path(image_file_name, image_folder_path):
 
 
 def create_suffixed_file(file_path, suffix):
-    _path, _format = file_path.split('.')
-    return '{}_{}.{}'.format(_path, suffix, _format)
+    _path, _format = os.path.splitext(file_path)
+    return '{}_{}{}'.format(_path, suffix, _format)
 
 
 def interpolate(v0, v1, t):

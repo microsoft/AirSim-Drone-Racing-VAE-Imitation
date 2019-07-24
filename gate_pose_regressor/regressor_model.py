@@ -29,16 +29,27 @@ class Regressor(Model):
             # weights=None,
             alpha=1.0
         )
-        # base_model = tf.keras.applications.ResNet50(
-        #     input_shape=im_shape,
-        #     include_top=False,
-        #     weights='imagenet'
-        # )
-        # base_model = tf.keras.applications.NASNetMobile(
-        #     input_shape=im_shape,
-        #     include_top=False,
-        #     weights='imagenet'
-        # )
+        print('[Cmvae] Done creating base model')
+
+        # Freeze the pre-trained model weights
+        base_model.trainable = trainable_base_model
+        # Refreeze layers until the layers we want to fine-tune
+        # for layer in base_model.layers[:100]:
+        #   layer.trainable =  False
+
+        # Regression head
+        # maxpool_layer = tf.keras.layers.GlobalMaxPooling2D()
+        maxpool_layer = tf.keras.layers.GlobalAveragePooling2D()
+        # flatten = Flatten()
+        reg_pre_layer = tf.keras.layers.Dense(units=128, activation='relu')
+        # self.reg_layer = tf.keras.layers.Dense(units=2 * self.n_z, activation='linear')
+        # Layer create custom model for depth regression
+        self.q_img = tf.keras.Sequential([
+            base_model,
+            maxpool_layer,
+            # flatten,
+            reg_pre_layer
+        ], name='q_img')
         print('[Cmvae] Done creating base model')
 
         # Freeze the pre-trained model weights
