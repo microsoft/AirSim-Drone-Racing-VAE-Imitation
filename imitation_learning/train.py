@@ -2,7 +2,6 @@
 from argparse import ArgumentParser
 
 import numpy as np
-import torch
 
 from imitation_learning.imitator import Imitator
 
@@ -44,8 +43,8 @@ if __name__ == "__main__":
                         help="Pre-trained model directory")
     parser.add_argument("--load-model", action="store_true",
                         help="Load pre-trained model")
-    parser.add_argument("--algo", default="adv",
-                        help="Algorithm to use (adv or bc)")
+    parser.add_argument("--algo", default="bc",
+                        help="Algorithm to use (adv:Adversarial or bc: Behavior Cloning)")
     args = parser.parse_args()
 
     train(args)

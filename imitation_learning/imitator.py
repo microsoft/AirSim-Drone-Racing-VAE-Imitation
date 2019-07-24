@@ -85,10 +85,11 @@ class Imitator(object):
         elif algo == "bc":
             from imitation_learning.models import MobileNetV2
             self.demonstrator = Demonstrations(task_name)
-            self.actor = MobileNetV2()  # .to(device)
+            self.actor = MobileNetV2()
             _state_dict = torch.load("imitation_learning/trained_models/mobilenet_v2.ptm")
             self.actor.load_state_dict(_state_dict)
             self.actor.classifier = nn.Linear(in_features=1280, out_features=4)
+            self.actor = self.actor.to(device)
             for params in self.actor.features.parameters():
                 params.requires_grad = False
             self.loss = nn.MSELoss()
@@ -122,8 +123,8 @@ class Imitator(object):
         for i in range(num_iter):
             # Sample from the demonstrator
             demo_states, demo_actions = self.demonstrator.sample(batch_size)
-            # demo_states = demo_state.to(device)
-            # demo_actions = demo_action.to(device)
+            demo_states = demo_states.to(device)
+            demo_actions = demo_actions.to(device)
 
             # Get predictions from actor
             actor_actions = self.actor(demo_states)
@@ -135,7 +136,6 @@ class Imitator(object):
             self.actor_optim.step()
             stats["loss_a"].append(loss.item())
         return stats
-
 
     def _learn_adversarial(self, num_iter: int, batch_size: int=256) -> dict:
         """Learn an imitator model (actor, discriminator) using adversarial loss

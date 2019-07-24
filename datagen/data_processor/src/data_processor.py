@@ -104,7 +104,7 @@ def process(
     f_images = open(result_images_file_path, 'w+')
     writer_v = csv.DictWriter(f_velocities, RESULT_COLUMNS, delimiter=',')
     writer_i = csv.DictWriter(f_images, ['ImageFile'], delimiter=',')
-    row_counter = 0
+    row_counter, missed = 0, 0
 
     for _, image_row in images.iterrows():
         v1, v2 = find_closest_rows(image_row[TIME_COLUMN], velocity_iterator)
@@ -112,14 +112,23 @@ def process(
             continue
         interpolated = interpolate_record(v1, v2, image_row)
         row_counter += 1
+
+        image_path = create_image_path(
+            image_row['ImageFile'],
+            images_folder_path
+        )
+
+        if not os.path.isfile(image_path):
+            missed += 1
+            continue
+
         writer_v.writerow(interpolated)
         writer_i.writerow({
-            'ImageFile': create_image_path(
-                image_row['ImageFile'],
-                images_folder_path
-            )
+            'ImageFile': image_path
         })
 
+    print('--------------------------------')
+    print('Missed files: {}'.format(missed))
     f_velocities.close()
     f_images.close()
 

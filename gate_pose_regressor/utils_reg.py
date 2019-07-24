@@ -12,6 +12,7 @@ import tf
 import tf.msg
 from tf import transformations
 import rospy
+import time
 
 
 def polarTranslation(r, theta, psi):
@@ -62,3 +63,19 @@ def convert_gate_base2world(p_o_b, t_b_g, phi_rel):
     q = transformations.quaternion_from_euler(phi_gate, 0, 0, axes='rzyx')
     p_o_g = Pose(t_o_g, Quaternionr(q[0], q[1], q[2], q[3]))
     return p_o_g
+
+
+def MoveCheckeredGates(client):
+    gate_names_sorted = sorted(client.simListSceneObjects("Gate.*"))
+    # gate_names_sorted_bad is ['Gate0', 'Gate10_21', 'Gate11_23', 'Gate1_3', 'Gate2_5', 'Gate3_7', 'Gate4_9', 'Gate5_11', 'Gate6_13', 'Gate7_15', 'Gate8_17', 'Gate9_19']
+    # number after underscore is unreal garbage
+    pose_far = Pose(Vector3r(0,0,1), Quaternionr())
+    for gate in gate_names_sorted:
+        client.simSetObjectPose(gate, pose_far)
+        # time.sleep(0.05)
+
+
+def RedGateSpawner(client):
+    for idx in range(10):
+        pose = Pose(Vector3r(10+idx*6, (np.random.random()-0.5)*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
+        client.simSpawnObject("gate_"+str(idx), "RedGate16x16", pose, 1.5)

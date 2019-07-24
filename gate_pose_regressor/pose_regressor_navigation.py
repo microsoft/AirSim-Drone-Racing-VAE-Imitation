@@ -11,6 +11,7 @@ import airsim.utils
 import time
 import numpy as np
 import gate_regressor
+import utils_reg
 
 print(os.path.abspath(airsim.__file__))
 
@@ -18,7 +19,8 @@ if __name__ == "__main__":
     # set airsim client
     client = airsim.MultirotorClient()
     client.confirmConnection()
-    client.simLoadLevel('Soccer_Field_Easy')
+    # client.simLoadLevel('Soccer_Field_Easy')
+    client.simLoadLevel('Soccer_Field_Medium')
     time.sleep(2)
     # should match the names in settings.json
     drone_name = "drone_0"
@@ -30,16 +32,19 @@ if __name__ == "__main__":
     client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains(), vehicle_name=drone_name)
     time.sleep(0.01)
 
+    # utils_reg.MoveCheckeredGates(client)
+    utils_reg.RedGateSpawner(client)
+
     # wait till takeoff complete
     time.sleep(0.2)
     time.sleep(0.05)
-    client.moveOnSplineAsync([airsim.Vector3r(0, 0, -0.3)], vel_max=15.0, acc_max=5.0, vehicle_name=drone_name).join()
+    client.moveOnSplineAsync([airsim.Vector3r(0, 0, 10)], vel_max=15.0, acc_max=5.0, vehicle_name=drone_name).join()
 
     time.sleep(1.0)
 
     img_resolution = 96
     vel_max = 15.0
-    acc_max = 5.0
+    acc_max = 5.00
     path_weights = '/home/rb/catkin_ws/src/AutonomousDrivingCookbook/AirSimE2EDeepLearning/output_reg3/regressor_model_185.ckpt'
     gate_regressor = gate_regressor.GateRegressor(img_resolution, path_weights)
 
@@ -56,6 +61,7 @@ if __name__ == "__main__":
         #todo: adjust spline points to .5m in front and behind gates after this works
         print(gate_pose.position)
         print('Before move spline')
+        client.moveByVelocityAsync()
         client.moveOnSplineAsync([gate_pose.position], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name)
         print('Done move spline')
         time.sleep(1.0)

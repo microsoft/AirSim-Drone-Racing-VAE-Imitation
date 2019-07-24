@@ -1,4 +1,7 @@
+import torch
 import torch.nn as nn
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
 import math
 
 
@@ -123,3 +126,18 @@ class MobileNetV2(nn.Module):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
+
+
+def get_preprocessed_inputs():
+    """Pre-process inputs to match with the ImageNet training routine 4 using pre-trained wts"""
+    input_size = 224
+    normalizer = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                       std=[0.229, 0.224, 0.225])
+    train_dataset = datasets.ImageFolder("imitation_learning/demonstrations/images",
+                                         transforms.Compose([
+                                             transforms.RandomResizedCrop(input_size, scale=(0.2, 1.0)),
+                                             transforms.RandomHorizontalFlip(),
+                                             transforms.ToTensor(),
+                                             normalizer,
+                                         ]))
+    return train_dataset
