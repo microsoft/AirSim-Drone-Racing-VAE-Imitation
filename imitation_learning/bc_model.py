@@ -3,65 +3,94 @@ from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape
 
 
-class Regressor(Model):
+class ImgRegressor(Model):
     def __init__(self, trainable_base_model=True, res=96):
-        super(Regressor, self).__init__()
+        super(ImgRegressor, self).__init__()
+        self.create_model()
 
-        self.res = res
-        self.create_q_img(trainable_base_model)
-        self.create_p_vel()
+    def call(self, img):
+        # Input
+        x1 = self.conv0(img)
+        x1 = self.max0(x1)
 
-    def call(self, x):
-        # Encoding
-        x = self.q_img(x)
-        x = self.p_vel(x)
+        # First residual block
+        x2 = self.bn0(x1)
+        x2 = tf.keras.layers.Activation('relu')(x2)
+        x2 = self.conv1(x2)
+
+        x2 = self.bn1(x2)
+        x2 = tf.keras.layers.Activation('relu')(x2)
+        x2 = self.conv2(x2)
+
+        x1 = self.conv3(x1)
+        x3 = tf.keras.layers.add([x1, x2])
+
+        # Second residual block
+        x4 = self.bn2(x3)
+        x4 = tf.keras.layers.Activation('relu')(x4)
+        x4 = self.conv4(x4)
+
+        x4 = self.bn3(x4)
+        x4 = tf.keras.layers.Activation('relu')(x4)
+        x4 = self.conv5(x4)
+
+        x3 = self.conv6(x3)
+        x5 = tf.keras.layers.add([x3, x4])
+
+        # Third residual block
+        x6 = self.bn4(x5)
+        x6 = tf.keras.layers.Activation('relu')(x6)
+        x6 = self.conv7(x6)
+
+        x6 = self.bn5(x6)
+        x6 = tf.keras.layers.Activation('relu')(x6)
+        x6 = self.conv8(x6)
+
+        x5 = self.conv9(x5)
+        x7 = tf.keras.layers.add([x5, x6])
+
+        x = tf.keras.layers.Flatten()(x7)
+        x = tf.keras.layers.Activation('relu')(x)
+        # x = tf.keras.layers.Dropout(0.5)(x)
+
+        # Gate regression output
+        x = self.dense0(x)
+        x = self.dense1(x)
+        x = self.dense2(x)
         return x
 
-    def create_q_img(self, trainable_base_model):
+    def create_model(self):
         print('[Cmvae] Starting q_img')
-        im_shape = (self.res, self.res, 3)
-        # Pre-trained model with MobileNetV2
-        print('[Cmvae] Creating base model')
-        base_model = tf.keras.applications.MobileNetV2(
-            input_shape=im_shape,
-            include_top=False,
-            weights='imagenet',
-            # weights=None,
-            alpha=1.0
-        )
-        print('[Cmvae] Done creating base model')
+        # im_shape = (self.res, self.res, 3)
 
-        # Freeze the pre-trained model weights
-        base_model.trainable = trainable_base_model
-        # Refreeze layers until the layers we want to fine-tune
-        # for layer in base_model.layers[:100]:
-        #   layer.trainable =  False
+        self.max0 = tf.keras.layers.MaxPooling2D(pool_size=2, strides=2)  # default pool_size='2', strides=2
 
-        # Regression head
-        # maxpool_layer = tf.keras.layers.GlobalMaxPooling2D()
-        maxpool_layer = tf.keras.layers.GlobalAveragePooling2D()
-        # flatten = Flatten()
-        reg_pre_layer = tf.keras.layers.Dense(units=128, activation='relu')
-        # self.reg_layer = tf.keras.layers.Dense(units=2 * self.n_z, activation='linear')
-        # Layer create custom model for depth regression
-        self.q_img = tf.keras.Sequential([
-            base_model,
-            maxpool_layer,
-            # flatten,
-            reg_pre_layer
-        ], name='q_img')
+        self.bn0 = tf.keras.layers.BatchNormalization()
+        self.bn1 = tf.keras.layers.BatchNormalization()
+        self.bn2 = tf.keras.layers.BatchNormalization()
+        self.bn3 = tf.keras.layers.BatchNormalization()
+        self.bn4 = tf.keras.layers.BatchNormalization()
+        self.bn5 = tf.keras.layers.BatchNormalization()
 
-        print('[Cmvae] Done with q_img')
+        self.conv0 = Conv2D(filters=32, kernel_size=5, strides=2, padding='same', activation='linear')
+        self.conv1 = Conv2D(filters=32, kernel_size=3, strides=2, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv2 = Conv2D(filters=32, kernel_size=3, strides=1, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv3 = Conv2D(filters=32, kernel_size=1, strides=2, padding='same', activation='linear')
+        self.conv4 = Conv2D(filters=64, kernel_size=3, strides=2, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv5 = Conv2D(filters=64, kernel_size=3, strides=1, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv6 = Conv2D(filters=64, kernel_size=1, strides=2, padding='same', activation='linear')
+        self.conv7 = Conv2D(filters=128, kernel_size=3, strides=2, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv8 = Conv2D(filters=128, kernel_size=3, strides=1, padding='same', activation='linear',
+                            kernel_initializer='he_normal', kernel_regularizer=tf.keras.regularizers.l2(1e-4))
+        self.conv9 = Conv2D(filters=128, kernel_size=1, strides=2, padding='same', activation='linear')
 
-    def create_p_vel(self):
-        print('[Cmvae] Starting p_gate')
-        # d3 = Dense(units=128, activation='relu')
-        d4 = Dense(units=64, activation='relu')
-        # self.d5 = Dense(units=4*self.n_gates, trainable=trainable_decoder)
-        d5 = Dense(units=4, activation='linear')  # 4 numerical outputs for vx, vy, vz, vyaw
-        self.p_vel = tf.keras.Sequential([
-            # d3,
-            d4,
-            d5
-        ], name='p_gate')
-        print('[Cmvae] Done with p_gate')
+        self.dense0 = tf.keras.layers.Dense(units=256, activation='relu')
+        self.dense1 = tf.keras.layers.Dense(units=64, activation='relu')
+        # self.dense2 = tf.keras.layers.Dense(units=4, activation='tanh')
+        self.dense2 = tf.keras.layers.Dense(units=4, activation='linear')
+

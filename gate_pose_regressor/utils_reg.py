@@ -1,3 +1,4 @@
+from __future__ import division
 import airsim
 from airsim.utils import to_eularian_angles, to_quaternion
 import numpy as np
@@ -13,7 +14,8 @@ import tf.msg
 from tf import transformations
 import rospy
 import time
-
+import random
+import math
 
 def polarTranslation(r, theta, psi):
     # follow math convention for polar coordinates
@@ -75,7 +77,84 @@ def MoveCheckeredGates(client):
         # time.sleep(0.05)
 
 
-def RedGateSpawner(client):
+def RedGateSpawner(client, noise_amp):
     for idx in range(10):
-        pose = Pose(Vector3r(10+idx*6, (np.random.random()-0.5)*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
+        noise = (np.random.random()-0.5)*noise_amp
+        pose = Pose(Vector3r(10+idx*6, noise*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
         client.simSpawnObject("gate_"+str(idx), "RedGate16x16", pose, 1.5)
+
+
+def RedGateSpawnerCircle(client):
+    num_gates = 10
+    track = generate_gate_poses(num_gates=num_gates, race_course_radius=30)
+    for idx in range(num_gates):
+        client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
+
+
+def generate_gate_poses(num_gates, race_course_radius, type_of_segment="circle"):
+    if type_of_segment == "circle":
+        (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius) for i in range(3)])
+        # todo unreadable code
+        # todo un-hardcode
+        gate_poses = [\
+                        airsim.Pose(\
+                        airsim.Vector3r((x_t[t_i][0] - x_t[0][0] - 4.0), (y_t[t_i][0] - y_t[0][0] - 4.0), random.uniform(-5.0, -9.0)),\
+                        quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1])\
+                      )\
+                    for t_i in range(num_gates)]
+    # elif type_of_segment == "cubic":
+    return gate_poses
+
+
+def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
+    default_gate_facing_vector = type("", (), dict(x=0, y=1, z=0))()
+    r0 = default_gate_facing_vector
+    q = airsim.Quaternionr(
+            r0.y * dz_dt - r0.z * dy_dt,
+            r0.z * dx_dt - r0.x * dz_dt,
+            r0.x * dy_dt - r0.y * dx_dt,
+            math.sqrt((r0.x**2 + r0.y**2 + r0.z**2) * (dx_dt**2 + dy_dt**2 + dz_dt**2)) + (r0.x * dx_dt + r0.y * dy_dt + r0.z * dz_dt)
+        )
+    #Normalize
+    length = q.get_length()
+    if (length == 0.0):
+        q.w_val = 1.0
+    else:
+        q.w_val /= length
+        q.x_val /= length
+        q.y_val /= length
+        q.z_val /= length
+    return q
+
+
+def generate_circle(i, num_gates, race_course_radius):
+    ts = [t / (num_gates) for t in range(0, num_gates)]
+    samples = [0 for t in ts]
+    derivatives = [0 for t in ts]
+    min_radius = race_course_radius + 4.0
+    max_radius = race_course_radius - 4.0
+    max_radius_delta = 5.0
+    radius_list = [random.uniform(min_radius, max_radius) for t in ts]
+    # not a circle, but hey it's random-ish. and the wrong derivative actually make the track challenging
+    # come back again later.
+    if i == 0:
+        for (idx, t) in enumerate(ts):
+            radius = radius_list[idx]
+            if idx > 0:
+                radius = np.clip(radius, radius_list[idx-1] - max_radius_delta, radius_list[idx-1] + max_radius_delta)
+                radius = np.clip(radius, 0.0, radius)
+            samples[idx] = radius * math.cos(2.*math.pi * t)
+            derivatives[idx] = radius * -math.sin(2.*math.pi * t)
+    elif i == 1:
+        for (idx, t) in enumerate(ts):
+            radius = radius_list[idx]
+            if idx > 0:
+                radius = np.clip(radius, radius_list[idx-1] - max_radius_delta, radius_list[idx-1] + max_radius_delta)
+                radius = np.clip(radius, 0.0, radius)
+            samples[idx] = radius * math.sin(2.*math.pi * t)
+            derivatives[idx] = radius * math.cos(2.*math.pi * t)
+    else:
+        for (idx, t) in enumerate(ts):
+            samples[idx] = 0.
+            derivatives[idx] = 0.
+    return list(zip(samples, derivatives))
