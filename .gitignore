@@ -2,7 +2,7 @@
 .vscode
 *~
 __pycache__
-airsim/*pyc
+*pyc
 .idea/
 *.png
 *.zip
