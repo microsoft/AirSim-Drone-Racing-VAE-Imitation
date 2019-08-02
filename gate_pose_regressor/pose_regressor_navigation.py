@@ -45,7 +45,7 @@ if __name__ == "__main__":
     img_resolution = 96
     vel_max = 15.0
     acc_max = 5.00
-    path_weights = '/home/rb/catkin_ws/src/AutonomousDrivingCookbook/AirSimE2EDeepLearning/output_reg3/regressor_model_185.ckpt'
+    path_weights = '/home/rb/data/model_outputs/reg_1/reg_model_185.ckpt'
     gate_regressor = gate_regressor.GateRegressor(img_resolution, path_weights)
 
     while True:

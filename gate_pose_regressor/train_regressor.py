@@ -16,11 +16,11 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_bright_1k'
-output_dir = '/home/rb/data/model_outputs/reg0_0'
-batch_size = 32
+data_dir = '/home/rb/data/airsim_datasets/soccer_bright_100k'
+output_dir = '/home/rb/data/model_outputs/reg_1'
+batch_size = 64
 epochs = 10000
-img_res = 64
+img_res = 96
 
 ###########################################
 # CUSTOM TF FUNCTIONS
