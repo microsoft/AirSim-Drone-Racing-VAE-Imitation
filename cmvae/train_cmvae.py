@@ -16,9 +16,9 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_bright_1k'
-output_dir = '/home/rb/data/model_outputs/cmvae_0'
-batch_size = 32
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_100k'
+output_dir = '/home/rb/data/model_outputs/cmvae_2'
+batch_size = 64
 epochs = 10000
 n_z = 20
 img_res = 64
@@ -192,7 +192,7 @@ for epoch in range(epochs):
     for test_images, test_labels in test_ds:
         test(test_images, test_labels, mode)
     # save model
-    if epoch % 10 == 0 and epoch > 0:
+    if epoch % 20 == 0 and epoch > 0:
         print('Saving weights to {}'.format(output_dir))
         model.save_weights(os.path.join(output_dir, "cmvae_model_{}.ckpt".format(epoch)))
 

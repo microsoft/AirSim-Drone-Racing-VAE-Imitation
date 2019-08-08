@@ -61,6 +61,8 @@ class Dronet(Model):
             x = self.dense0(x)
             x = self.dense1(x)
             gate_pose = self.dense2(x)
+            # phi_rel = self.dense_phi_rel(x)
+            # gate_pose = tf.concat([gate_pose, phi_rel], 1)
             return gate_pose
         else:
             return x
@@ -91,6 +93,7 @@ class Dronet(Model):
         self.dense0 = tf.keras.layers.Dense(units=64, activation='relu')
         self.dense1 = tf.keras.layers.Dense(units=32, activation='relu')
         self.dense2 = tf.keras.layers.Dense(units=num_outputs, activation='linear')
+        # self.dense_phi_rel = tf.keras.layers.Dense(units=2, activation='tanh')
 
         print('[Dronet] Done with dronet')
 

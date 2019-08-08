@@ -16,8 +16,8 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_bright_100k'
-output_dir = '/home/rb/data/model_outputs/reg_1'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_100k'
+output_dir = '/home/rb/data/model_outputs/reg_5'
 batch_size = 64
 epochs = 10000
 img_res = 96
@@ -69,7 +69,7 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # load dataset
 print('Starting dataset')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batch_size, img_res, num_channels=3)
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv_faster(data_dir, batch_size, img_res, num_channels=3)
 print('Done with dataset')
 
 # create model
@@ -105,7 +105,7 @@ for epoch in range(epochs):
     with metrics_writer.as_default():
         tf.summary.scalar('train_loss_rec_gate', train_loss_rec_gate.result(), step=epoch)
         tf.summary.scalar('test_loss_rec_gate', test_loss_rec_gate.result(), step=epoch)
-    print('Epoch {} | L_gate: {} | L_gate: {}'
+    print('Epoch {} | Train L_gate: {} | Test L_gate: {}'
           .format(epoch, train_loss_rec_gate.result(), test_loss_rec_gate.result()))
     reset_metrics() # reset all the accumulators of metrics
 

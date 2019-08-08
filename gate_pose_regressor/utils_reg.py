@@ -77,12 +77,14 @@ def MoveCheckeredGates(client):
         # time.sleep(0.05)
 
 
-def RedGateSpawner(client, noise_amp):
-    for idx in range(10):
+def RedGateSpawner(client, num_gates, noise_amp):
+    gate_poses=[]
+    for idx in range(num_gates):
         noise = (np.random.random()-0.5)*noise_amp
-        pose = Pose(Vector3r(10+idx*6, noise*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
+        pose = Pose(Vector3r(10+idx*9, noise*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
         client.simSpawnObject("gate_"+str(idx), "RedGate16x16", pose, 1.5)
-
+        gate_poses.append(pose)
+    return gate_poses
 
 def RedGateSpawnerCircle(client):
     num_gates = 10

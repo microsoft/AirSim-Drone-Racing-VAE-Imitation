@@ -60,8 +60,8 @@ def de_normalize_v(v):
 
 def normalize_gate(pose):
     # normalization of velocities from whatever to [-1, 1] range
-    r_range = [3.0, 10.0]
-    cam_fov = 90  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
+    r_range = [0.1, 20]
+    cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
     theta_range = [-alpha, alpha]
     psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
@@ -86,8 +86,8 @@ def normalize_gate(pose):
 
 def de_normalize_gate(pose):
     # normalization of velocities from [-1, 1] range to whatever
-    r_range = [3.0, 10.0]
-    cam_fov = 90  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
+    r_range = [0.1, 20]
+    cam_fov = 90*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
     alpha = cam_fov / 180.0 * np.pi / 2.0  # alpha is half of fov angle
     theta_range = [-alpha, alpha]
     psi_range = [np.pi / 2 - alpha, np.pi / 2 + alpha]
@@ -109,6 +109,54 @@ def de_normalize_gate(pose):
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
 
+def create_dataset_csv_faster(data_dir, batch_size, res, num_channels):
+    print('Going to read file list')
+    files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+    print('Done. Starting sorting.')
+    files_list.sort()  # make sure we're reading the images in order later
+    print('Done. Before images_np init')
+    images_np = np.zeros((len(files_list), res, res, num_channels)).astype(np.float32)
+    print('Done. Going to read images.')
+    idx = 0
+    for file in files_list:
+        if num_channels == 1:
+            im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
+            im = np.expand_dims(np.array(im),
+                                axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
+            raise ValueError('num channel diff than zero not handled yet')
+        elif num_channels == 3:
+            im = cv2.imread(file)
+            im = cv2.resize(im, (res, res))
+            im = im / 255.0 * 2.0 - 1.0
+            images_np[idx, :] = im
+            if idx % 5000 == 0:
+                print ('image idx = {}'.format(idx))
+            idx = idx + 1
+    print('Done. Going to read csv file.')
+    # prepare gate R THETA PSI PHI as np array reading from a file
+    raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
+    # sanity check
+    if raw_table.shape[0] != images_np.shape[0]:
+        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
+    raw_table.astype(np.float32)
+
+    # print some useful statistics
+    print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
+    print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
+    print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
+    print("Max of  gate values: {}".format(np.max(raw_table, axis=0)))
+    print("Min of  gate values: {}".format(np.min(raw_table, axis=0)))
+
+    # normalize distances to gate to [-1, 1] range
+    raw_table = normalize_gate(raw_table)
+
+    img_train, img_test, dist_train, dist_test = train_test_split(images_np, raw_table, test_size=0.1, random_state=42)
+
+    # convert to tf format dataset and prepare batches
+    ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
+    ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
+
+    return ds_train, ds_test
 
 def create_dataset_csv(data_dir, batch_size, res, num_channels):
     # prepare image dataset from a folder
@@ -133,11 +181,11 @@ def create_dataset_csv(data_dir, batch_size, res, num_channels):
     raw_table.astype(np.float32)
 
     # print some useful statistics
-    print("Average gate values: {}".format(np.mean(raw_table, axis=1)))
-    print("Median  gate values: {}".format(np.median(raw_table, axis=1)))
-    print("STD of  gate values: {}".format(np.std(raw_table, axis=1)))
-    print("Max of  gate values: {}".format(np.max(raw_table, axis=1)))
-    print("Min of  gate values: {}".format(np.min(raw_table, axis=1)))
+    print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
+    print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
+    print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
+    print("Max of  gate values: {}".format(np.max(raw_table, axis=0)))
+    print("Min of  gate values: {}".format(np.min(raw_table, axis=0)))
 
     # normalize distances to gate to [-1, 1] range
     raw_table = normalize_gate(raw_table)
@@ -153,18 +201,25 @@ def create_dataset_csv(data_dir, batch_size, res, num_channels):
 
 def create_test_dataset_csv(data_dir, res, num_channels):
     # prepare image dataset from a folder
+    print('Going to read file list')
     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+    print('Done. Starting sorting.')
     files_list.sort()  # make sure we're reading the images in order later
-    images_list = []
+    print('Done. Before images_np init')
+    images_np = np.zeros((len(files_list), res, res, num_channels)).astype(np.float32)
+    print('After images_np init')
+    idx = 0
     for file in files_list:
         if num_channels == 1:
             im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
             im = np.expand_dims(np.array(im), axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
+            raise ValueError('num channel diff than zero not handled yet')
         elif num_channels == 3:
-            im = Image.open(file).resize((res, res), Image.BILINEAR)
-            im = np.array(im)/255.0*2 - 1.0  # convert to the -1 -> 1 scale
-        images_list.append(im)
-    images_np = np.array(images_list).astype(np.float32)
+            im = cv2.imread(file)
+            im = cv2.resize(im, (res, res))
+            im = im/255.0*2.0-1.0
+            images_np[idx, :] = im
+            idx = idx + 1
 
     # prepare gate R THETA PSI PHI as np array reading from a file
     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')

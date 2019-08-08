@@ -5,6 +5,7 @@ import tensorflow as tf
 from PIL import Image
 import glob
 import matplotlib.pyplot as plt
+import cv2
 
 import os
 import sys
@@ -24,7 +25,7 @@ import racing_utils
 
 # DEFINE TESTING META PARAMETERS
 data_dir = '/home/rb/data/airsim_datasets/soccer_bright_1k'
-weights_path = '/home/rb/data/model_outputs/reg0_1/reg_model_330.ckpt'
+weights_path = '/home/rb/data/model_outputs/reg_5/reg_model_20.ckpt'
 img_res = 96
 
 ###########################################
@@ -51,6 +52,11 @@ predictions = predictions.numpy()
 # de-normalization of distances
 predictions = racing_utils.dataset_utils.de_normalize_gate(predictions)
 gt = racing_utils.dataset_utils.de_normalize_gate(raw_table)
+
+# show images in a loop
+# for idx in range(images_np.shape[1]):
+#     cv2.imshow('image', images_np[idx, :])
+#     cv2.waitKey(1000)
 
 # calculate statistics with respect to ground-truth values
 racing_utils.stats_utils.calculate_gate_stats(predictions, gt)
