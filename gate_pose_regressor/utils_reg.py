@@ -77,6 +77,10 @@ def MoveCheckeredGates(client):
         # time.sleep(0.05)
 
 
+def AllGatesDestroyer(client):
+    [client.simDestroyObject(gate_object) for gate_object in client.simListSceneObjects(".*[Gg]ate.*")]
+
+
 def RedGateSpawner(client, num_gates, noise_amp):
     gate_poses=[]
     for idx in range(num_gates):
@@ -86,21 +90,22 @@ def RedGateSpawner(client, num_gates, noise_amp):
         gate_poses.append(pose)
     return gate_poses
 
-def RedGateSpawnerCircle(client):
-    num_gates = 10
-    track = generate_gate_poses(num_gates=num_gates, race_course_radius=30)
+
+def RedGateSpawnerCircle(client, num_gates, radius, radius_noise, height_range):
+    track = generate_gate_poses(num_gates=num_gates, race_course_radius=radius, radius_noise=radius_noise, height_range=height_range)
     for idx in range(num_gates):
         client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
 
 
-def generate_gate_poses(num_gates, race_course_radius, type_of_segment="circle"):
+def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, type_of_segment="circle"):
     if type_of_segment == "circle":
-        (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius) for i in range(3)])
+        (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius, radius_noise) for i in range(3)])
         # todo unreadable code
         # todo un-hardcode
+        # airsim.Vector3r((x_t[t_i][0] - x_t[0][0]), (y_t[t_i][0] - y_t[0][0]), random.uniform(height_range[0], height_range[1])), \
         gate_poses = [\
                         airsim.Pose(\
-                        airsim.Vector3r((x_t[t_i][0] - x_t[0][0] - 4.0), (y_t[t_i][0] - y_t[0][0] - 4.0), random.uniform(-5.0, -9.0)),\
+                        airsim.Vector3r((x_t[t_i][0]), (y_t[t_i][0]), random.uniform(height_range[0], height_range[1])), \
                         quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1])\
                       )\
                     for t_i in range(num_gates)]
@@ -129,12 +134,12 @@ def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
     return q
 
 
-def generate_circle(i, num_gates, race_course_radius):
+def generate_circle(i, num_gates, race_course_radius, radius_amp=4.0):
     ts = [t / (num_gates) for t in range(0, num_gates)]
     samples = [0 for t in ts]
     derivatives = [0 for t in ts]
-    min_radius = race_course_radius + 4.0
-    max_radius = race_course_radius - 4.0
+    min_radius = race_course_radius + radius_amp
+    max_radius = race_course_radius - radius_amp
     max_radius_delta = 5.0
     radius_list = [random.uniform(min_radius, max_radius) for t in ts]
     # not a circle, but hey it's random-ish. and the wrong derivative actually make the track challenging
