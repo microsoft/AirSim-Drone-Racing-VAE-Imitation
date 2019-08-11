@@ -20,8 +20,8 @@ class BcLatent(Model):
         dense4 = tf.keras.layers.Dense(units=4, activation='linear')
         self.network = tf.keras.Sequential([
             dense0,
-            dense1,
-            dense2,
+            # dense1,
+            # dense2,
             dense3,
             dense4
         ], name='bc_dense')

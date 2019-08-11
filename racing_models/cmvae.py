@@ -42,7 +42,7 @@ class Cmvae(Model):
             gate_recon = self.p_gate(z)
             return img_recon, gate_recon, means, stddev, z
 
-    def encode(self, x, mode):
+    def encode(self, x):
         x = self.q_img(x)
         means = self.mean_params(x)
         stddev = tf.math.exp(0.5 * self.stddev_params(x))

@@ -139,7 +139,6 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
         im = cv2.resize(im, (res, res))
         im = im / 255.0 * 2.0 - 1.0
         images_np[idx, :] = im
-        idx = idx + 1
         if idx % 10000 == 0:
             print ('image idx = {}'.format(idx))
         idx = idx + 1
@@ -215,7 +214,7 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
     return images_np, raw_table
 
 
-def create_dataset_txt(data_dir, batch_size, res, num_channels):
+def create_dataset_txt(data_dir, batch_size, res, data_mode='train'):
     vel_table = np.loadtxt(data_dir + '/proc_vel.txt', delimiter=',').astype(np.float32)
     with open(data_dir + '/proc_images.txt') as f:
         img_table = f.read().splitlines()
@@ -224,14 +223,24 @@ def create_dataset_txt(data_dir, batch_size, res, num_channels):
     if vel_table.shape[0] != len(img_table):
         raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(len(img_table), vel_table.shape[0]))
 
-    images_list = []
+    size_data = len(img_table)
+    images_np = np.zeros((size_data, res, res, 3)).astype(np.float32)
+
+    print('Done. Going to read images.')
+    idx = 0
     for img_name in img_table:
-        im = Image.open(img_name).resize((res, res), Image.BILINEAR)
-        im = np.array(im)/255.0*2 - 1.0  # convert to the -1 -> 1 scale
-        # TODO: figure out why there's a 4th channel in dataset
-        im = im[:,:,:3]
-        images_list.append(im)
-    images_np = np.array(images_list).astype(np.float32)
+        # read data in BGR format by default!!!
+        # notice that model is going to be trained in BGR
+        im = cv2.imread(img_name, cv2.IMREAD_COLOR)
+        im = cv2.resize(im, (res, res))
+        im = im / 255.0 * 2.0 - 1.0
+        images_np[idx, :] = im
+        if idx % 1000 == 0:
+            print ('image idx = {} out of {} images'.format(idx, size_data))
+        idx = idx + 1
+        if idx == size_data:
+            # reached the last point -- exit loop of images
+            break
 
     # print some useful statistics and normalize distances
     print("Num samples: {}".format(vel_table.shape[0]))
@@ -243,19 +252,15 @@ def create_dataset_txt(data_dir, batch_size, res, num_channels):
     # normalize the values of velocities to the [-1, 1] range
     vel_table = normalize_v(vel_table)
 
-    img_train, img_test, dist_train, dist_test = train_test_split(images_np, vel_table, test_size=0.1, random_state=42)
+    img_train, img_test, v_train, v_test = train_test_split(images_np, vel_table, test_size=0.1, random_state=42)
 
-    # convert to tf format dataset and prepare batches
-    ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
-    ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
-
-    return ds_train, ds_test
-
-
-
-
-
-
+    if data_mode == 'train':
+        # convert to tf format dataset and prepare batches
+        ds_train = tf.data.Dataset.from_tensor_slices((img_train, v_train)).batch(batch_size)
+        ds_test = tf.data.Dataset.from_tensor_slices((img_test, v_test)).batch(batch_size)
+        return ds_train, ds_test
+    elif data_mode == 'test':
+        return img_test, v_test
 
 
 # def create_dataset_csv(data_dir, batch_size, res, num_channels, max_size=None):
