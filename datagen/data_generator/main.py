@@ -1,6 +1,6 @@
 from PoseSampler import *
 
-num_samples = 1000
+num_samples = 100
 dataset_path = '/home/rb/data/airsim_datasets/soccer_new_test'
 pose_sampler = PoseSampler(num_samples, dataset_path)
 

@@ -14,6 +14,15 @@ import numpy as np
 from airsim.types import Pose, Vector3r, Quaternionr
 
 
+def interp_vector(a, b, n):
+    delta = (b-a)/(n-1)
+    list_vecs = []
+    for i in range(n):
+        new_vec = a+delta*i
+        list_vecs.append(new_vec)
+    return np.asarray(list_vecs)
+
+
 def randomQuadPose(x_range, y_range, z_range, yaw_range, pitch_range, roll_range):
     x = randomSample(x_range)
     y = randomSample(y_range)

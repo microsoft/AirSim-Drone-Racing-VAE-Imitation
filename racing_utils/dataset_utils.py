@@ -12,6 +12,14 @@ import cv2
 from sklearn.model_selection import train_test_split
 
 
+def convert_bgr2rgb(img_bgr):
+    return cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+
+
+def convert_rgb2bgr(img_rgb):
+    return cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+
+
 def normalize_v(v):
     # normalization of velocities from whatever to [-1, 1] range
     v_x_range = [-1, 7]
@@ -109,72 +117,41 @@ def de_normalize_gate(pose):
         raise Exception('Error in data format of V shape: {}'.format(pose.shape))
     return pose
 
-def create_dataset_csv_faster(data_dir, batch_size, res, num_channels):
+
+def create_dataset_csv(data_dir, batch_size, res, max_size=None):
     print('Going to read file list')
     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
     print('Done. Starting sorting.')
     files_list.sort()  # make sure we're reading the images in order later
     print('Done. Before images_np init')
-    images_np = np.zeros((len(files_list), res, res, num_channels)).astype(np.float32)
+    if max_size is not None:
+        size_data = max_size
+    else:
+        size_data = len(files_list)
+    images_np = np.zeros((size_data, res, res, 3)).astype(np.float32)
+
     print('Done. Going to read images.')
     idx = 0
     for file in files_list:
-        if num_channels == 1:
-            im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
-            im = np.expand_dims(np.array(im),
-                                axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
-            raise ValueError('num channel diff than zero not handled yet')
-        elif num_channels == 3:
-            im = cv2.imread(file)
-            im = cv2.resize(im, (res, res))
-            im = im / 255.0 * 2.0 - 1.0
-            images_np[idx, :] = im
-            if idx % 5000 == 0:
-                print ('image idx = {}'.format(idx))
-            idx = idx + 1
+        # read data in BGR format by default!!!
+        # notice that model is going to be trained in BGR
+        im = cv2.imread(file, cv2.IMREAD_COLOR)
+        im = cv2.resize(im, (res, res))
+        im = im / 255.0 * 2.0 - 1.0
+        images_np[idx, :] = im
+        idx = idx + 1
+        if idx % 10000 == 0:
+            print ('image idx = {}'.format(idx))
+        idx = idx + 1
+        if idx == size_data:
+            # reached the last point -- exit loop of images
+            break
+
     print('Done. Going to read csv file.')
     # prepare gate R THETA PSI PHI as np array reading from a file
     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
-    # sanity check
-    if raw_table.shape[0] != images_np.shape[0]:
-        raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
-    raw_table.astype(np.float32)
+    raw_table = raw_table[:size_data, :]
 
-    # print some useful statistics
-    print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
-    print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
-    print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
-    print("Max of  gate values: {}".format(np.max(raw_table, axis=0)))
-    print("Min of  gate values: {}".format(np.min(raw_table, axis=0)))
-
-    # normalize distances to gate to [-1, 1] range
-    raw_table = normalize_gate(raw_table)
-
-    img_train, img_test, dist_train, dist_test = train_test_split(images_np, raw_table, test_size=0.1, random_state=42)
-
-    # convert to tf format dataset and prepare batches
-    ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
-    ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
-
-    return ds_train, ds_test
-
-def create_dataset_csv(data_dir, batch_size, res, num_channels):
-    # prepare image dataset from a folder
-    files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
-    files_list.sort() # make sure we're reading the images in order later
-    images_list = []
-    for file in files_list:
-        if num_channels == 1:
-            im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
-            im = np.expand_dims(np.array(im), axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
-        elif num_channels == 3:
-            im = Image.open(file).resize((res, res), Image.BILINEAR)
-            im = np.array(im)/255.0*2 - 1.0  # convert to the -1 -> 1 scale
-        images_list.append(im)
-    images_np = np.array(images_list).astype(np.float32)
-
-    # prepare gate R THETA PSI PHI as np array reading from a file
-    raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
     # sanity check
     if raw_table.shape[0] != images_np.shape[0]:
         raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
@@ -199,27 +176,27 @@ def create_dataset_csv(data_dir, batch_size, res, num_channels):
     return ds_train, ds_test
 
 
-def create_test_dataset_csv(data_dir, res, num_channels):
+def create_test_dataset_csv(data_dir, res, read_table=True):
     # prepare image dataset from a folder
     print('Going to read file list')
     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
     print('Done. Starting sorting.')
     files_list.sort()  # make sure we're reading the images in order later
     print('Done. Before images_np init')
-    images_np = np.zeros((len(files_list), res, res, num_channels)).astype(np.float32)
+    images_np = np.zeros((len(files_list), res, res, 3)).astype(np.float32)
     print('After images_np init')
     idx = 0
     for file in files_list:
-        if num_channels == 1:
-            im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
-            im = np.expand_dims(np.array(im), axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
-            raise ValueError('num channel diff than zero not handled yet')
-        elif num_channels == 3:
-            im = cv2.imread(file)
-            im = cv2.resize(im, (res, res))
-            im = im/255.0*2.0-1.0
-            images_np[idx, :] = im
-            idx = idx + 1
+        # read data in BGR format by default!!!
+        # notice that model was trained in BGR
+        im = cv2.imread(file, cv2.IMREAD_COLOR)
+        im = cv2.resize(im, (res, res))
+        im = im/255.0*2.0-1.0
+        images_np[idx, :] = im
+        idx = idx + 1
+
+    if not read_table:
+        return images_np, None
 
     # prepare gate R THETA PSI PHI as np array reading from a file
     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
@@ -229,16 +206,6 @@ def create_test_dataset_csv(data_dir, res, num_channels):
     raw_table.astype(np.float32)
 
     # print some useful statistics
-    print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
-    print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
-    print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
-    print("Max of  gate values: {}".format(np.max(raw_table, axis=0)))
-    print("Min of  gate values: {}".format(np.min(raw_table, axis=0)))
-
-    # normalize distances to gate to [-1, 1] range
-    raw_table = normalize_gate(raw_table)
-    # print some useful statistics
-    print('After normalizing:')
     print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
     print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
     print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
@@ -283,3 +250,55 @@ def create_dataset_txt(data_dir, batch_size, res, num_channels):
     ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
 
     return ds_train, ds_test
+
+
+
+
+
+
+
+
+# def create_dataset_csv(data_dir, batch_size, res, num_channels, max_size=None):
+#     # prepare image dataset from a folder
+#     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+#     files_list.sort() # make sure we're reading the images in order later
+#     images_list = []
+#     for file in files_list:
+#         if num_channels == 1:
+#             im = Image.open(file).resize((res, res), Image.BILINEAR).convert('L')
+#             im = np.expand_dims(np.array(im), axis=-1) / 255.0 * 2 - 1.0  # add one more axis and convert to the -1 -> 1 scale
+#         elif num_channels == 3:
+#             im = Image.open(file).resize((res, res), Image.BILINEAR)
+#             im = np.array(im)/255.0*2 - 1.0  # convert to the -1 -> 1 scale
+#         images_list.append(im)
+#     images_np = np.array(images_list).astype(np.float32)
+#
+#     # prepare gate R THETA PSI PHI as np array reading from a file
+#     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
+#
+#     # handle max size
+#     images_np = images_np[:max_size, :]
+#     raw_table = raw_table[:max_size, :]
+#
+#     # sanity check
+#     if raw_table.shape[0] != images_np.shape[0]:
+#         raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(images_np.shape[0], raw_table.shape[0]))
+#     raw_table.astype(np.float32)
+#
+#     # print some useful statistics
+#     print("Average gate values: {}".format(np.mean(raw_table, axis=0)))
+#     print("Median  gate values: {}".format(np.median(raw_table, axis=0)))
+#     print("STD of  gate values: {}".format(np.std(raw_table, axis=0)))
+#     print("Max of  gate values: {}".format(np.max(raw_table, axis=0)))
+#     print("Min of  gate values: {}".format(np.min(raw_table, axis=0)))
+#
+#     # normalize distances to gate to [-1, 1] range
+#     raw_table = normalize_gate(raw_table)
+#
+#     img_train, img_test, dist_train, dist_test = train_test_split(images_np, raw_table, test_size=0.1, random_state=42)
+#
+#     # convert to tf format dataset and prepare batches
+#     ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
+#     ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
+#
+#     return ds_train, ds_test

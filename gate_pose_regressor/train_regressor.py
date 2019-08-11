@@ -16,11 +16,13 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_100k'
-output_dir = '/home/rb/data/model_outputs/reg_5'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_10k'
+output_dir = '/home/rb/data/model_outputs/reg_0'
 batch_size = 64
 epochs = 10000
-img_res = 96
+img_res = 64
+max_size = None  # default is None
+learning_rate = 1e-4
 
 ###########################################
 # CUSTOM TF FUNCTIONS
@@ -69,12 +71,12 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # load dataset
 print('Starting dataset')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv_faster(data_dir, batch_size, img_res, num_channels=3)
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batch_size, img_res, max_size=max_size)
 print('Done with dataset')
 
 # create model
 model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
-optimizer = tf.keras.optimizers.Adam(lr=1e-4)
+optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics
 train_loss_rec_gate = tf.keras.metrics.Mean(name='train_loss_rec_gate')

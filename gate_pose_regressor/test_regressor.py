@@ -24,9 +24,10 @@ import racing_utils
 ###########################################
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_bright_1k'
-weights_path = '/home/rb/data/model_outputs/reg_5/reg_model_20.ckpt'
-img_res = 96
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+weights_path = '/home/rb/data/model_outputs/reg_7/reg_model_30.ckpt'
+img_res = 64
+read_table = True
 
 ###########################################
 
@@ -44,14 +45,16 @@ model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
 model.load_weights(weights_path)
 
 # Load test dataset
-images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, num_channels=3)
+images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, read_table=read_table)
 
 predictions = model(images_np)
 predictions = predictions.numpy()
 
 # de-normalization of distances
 predictions = racing_utils.dataset_utils.de_normalize_gate(predictions)
-gt = racing_utils.dataset_utils.de_normalize_gate(raw_table)
+
+if not read_table:
+    sys.exit()
 
 # show images in a loop
 # for idx in range(images_np.shape[1]):
@@ -59,5 +62,5 @@ gt = racing_utils.dataset_utils.de_normalize_gate(raw_table)
 #     cv2.waitKey(1000)
 
 # calculate statistics with respect to ground-truth values
-racing_utils.stats_utils.calculate_gate_stats(predictions, gt)
+racing_utils.stats_utils.calculate_gate_stats(predictions, raw_table)
 

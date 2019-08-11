@@ -16,12 +16,14 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_100k'
-output_dir = '/home/rb/data/model_outputs/cmvae_2'
-batch_size = 64
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
+output_dir = '/home/rb/data/model_outputs/cmvae_9'
+batch_size = 32
 epochs = 10000
 n_z = 20
 img_res = 64
+max_size = 300000  # default is None
+learning_rate = 1e-4
 
 ###########################################
 # CUSTOM TF FUNCTIONS
@@ -63,12 +65,12 @@ def regulate_weights(epoch):
     # else:
     #     beta = beta_max
     # for w_img
-    if epoch < 30:
-        w_img = 0.1
+    if epoch < 100:
+        w_img = 1.0
     else:
         w_img = 1.0
     # for w_gate
-    if epoch < 10:
+    if epoch < 100:
         w_gate = 1.0
     else:
         w_gate = 1.0
@@ -158,12 +160,12 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # load dataset
 print('Starting dataset')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batch_size, img_res, num_channels=3)
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batch_size, img_res, max_size=max_size)
 print('Done with dataset')
 
 # create model
 model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
-optimizer = tf.keras.optimizers.Adam(lr=1e-4)
+optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics
 train_loss_rec_img = tf.keras.metrics.Mean(name='train_loss_rec_img')
@@ -192,7 +194,7 @@ for epoch in range(epochs):
     for test_images, test_labels in test_ds:
         test(test_images, test_labels, mode)
     # save model
-    if epoch % 20 == 0 and epoch > 0:
+    if epoch % 5 == 0 and epoch > 0:
         print('Saving weights to {}'.format(output_dir))
         model.save_weights(os.path.join(output_dir, "cmvae_model_{}.ckpt".format(epoch)))
 
@@ -201,7 +203,7 @@ for epoch in range(epochs):
             tf.summary.scalar('train_loss_rec_img', train_loss_rec_img.result(), step=epoch)
             tf.summary.scalar('train_loss_rec_gate', train_loss_rec_gate.result(), step=epoch)
             tf.summary.scalar('train_loss_kl', train_loss_kl.result(), step=epoch)
-            tf.summary.scalar('', test_loss_rec_img.result(), step=epoch)
+            tf.summary.scalar('test_loss_rec_img', test_loss_rec_img.result(), step=epoch)
             tf.summary.scalar('test_loss_rec_gate', test_loss_rec_gate.result(), step=epoch)
             tf.summary.scalar('test_loss_kl', test_loss_kl.result(), step=epoch)
         print('Epoch {} | TRAIN: L_img: {}, L_gate: {}, L_kl: {}, L_tot: {} | TEST: L_img: {}, L_gate: {}, L_kl: {}, L_tot: {}'

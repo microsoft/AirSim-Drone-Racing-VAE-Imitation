@@ -8,7 +8,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 # import model
 models_path = os.path.join(curr_dir, '..', 'racing_models')
 sys.path.insert(0, models_path)
-import racing_models.dronet
+import racing_models
 
 # import utils
 models_path = os.path.join(curr_dir, '..', 'racing_utils')
@@ -17,7 +17,9 @@ import racing_utils
 
 
 class GateRegressor():
-    def __init__(self, path_weights):
+    def __init__(self, regressor_type, path_weights):
+        self.regressor_type = regressor_type
+
         # set tensorflow variables
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
         # 0 = all messages are logged (default behavior)
@@ -28,7 +30,10 @@ class GateRegressor():
         os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
         # create model and load weights
-        self.model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
+        if self.regressor_type == 'dronet':
+            self.model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
+        elif self.regressor_type == 'cmvae':
+            self.model = racing_models.cmvae.Cmvae(n_z=20, gate_dim=4, res=64, trainable_model=True)
         self.model.load_weights(path_weights)
 
     def predict_gate_pose(self, img, p_o_b):
@@ -39,7 +44,10 @@ class GateRegressor():
 
     def predict_relative_gate_pose(self, img):
         img = (img / 255.0) * 2 - 1.0
-        predictions = self.model(img)
+        if self.regressor_type == 'dronet':
+            predictions = self.model(img)
+        elif self.regressor_type == 'cmvae':
+            _, predictions, _, _, _ = self.model(img, mode=2)
         predictions = predictions.numpy()
         predictions = racing_utils.dataset_utils.de_normalize_gate(predictions)
         return predictions
