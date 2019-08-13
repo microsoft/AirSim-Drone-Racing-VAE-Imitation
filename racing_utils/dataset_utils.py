@@ -118,6 +118,37 @@ def de_normalize_gate(pose):
     return pose
 
 
+def read_images(data_dir, res, max_size=None):
+    print('Going to read image file list')
+    files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))
+    print('Done. Starting sorting.')
+    files_list.sort()  # make sure we're reading the images in order later
+    print('Done. Before images_np init')
+    if max_size is not None:
+        size_data = max_size
+    else:
+        size_data = len(files_list)
+    images_np = np.zeros((size_data, res, res, 3)).astype(np.float32)
+    print('Done. Going to read images.')
+    idx = 0
+    for img_name in files_list:
+        # read data in BGR format by default!!!
+        # notice that model is going to be trained in BGR
+        im = cv2.imread(img_name, cv2.IMREAD_COLOR)
+        im = cv2.resize(im, (res, res))
+        im = im / 255.0 * 2.0 - 1.0
+        images_np[idx, :] = im
+        if idx % 10000 == 0:
+            print ('image idx = {}'.format(idx))
+        idx = idx + 1
+        if idx == size_data:
+            # reached the last point -- exit loop of images
+            break
+
+    print('Done reading images.')
+    return images_np
+
+
 def create_dataset_csv(data_dir, batch_size, res, max_size=None):
     print('Going to read file list')
     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))

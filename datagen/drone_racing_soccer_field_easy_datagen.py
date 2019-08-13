@@ -246,7 +246,7 @@ class DroneRacingDataGenerator(object):
         self.acc_max = acc_max
 
     def fly_to_next_gate_with_moveOnSpline(self):
-        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=self.vel_max, acc_max=self.acc_max, vehicle_name=self.drone_name)
+        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=self.vel_max, acc_max=self.acc_max, vehicle_name=self.drone_name, add_curr_odom_position_constraint=True, add_curr_odom_velocity_constraint= True)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
     def join_all_pending_futures(self):
@@ -320,7 +320,7 @@ class DroneRacingDataGenerator(object):
         time.sleep(0.01)
         self.client.armDisarm(True, vehicle_name=self.drone_name)
         time.sleep(0.01)
-        self.client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains(), vehicle_name=self.drone_name)
+        self.client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains().to_list(), vehicle_name=self.drone_name)
         time.sleep(0.01)
         self.takeoff_with_moveOnSpline()
         self.set_num_training_laps(num_training_laps)

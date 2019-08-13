@@ -18,11 +18,13 @@ import racing_utils
 ###########################################
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+# data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+# data_dir = '/home/rb/data/real_life/video_0'
+data_dir = '/home/rb/data/real_life/hand_picked_0'
 weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
 n_z = 20
 img_res = 64
-read_table = True
+read_table = False
 
 num_imgs_display = 50
 columns = 10
@@ -61,11 +63,11 @@ images_np = ((images_np + 1.0) / 2.0 * 255.0).astype(np.uint8)
 img_recon = ((img_recon + 1.0) / 2.0 * 255.0).astype(np.uint8)
 gate_recon = racing_utils.dataset_utils.de_normalize_gate(gate_recon)
 
-if not read_table:
-    sys.exit()
+# if not read_table:
+#     sys.exit()
 
 # get stats for gate reconstruction
-racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
+# racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
 
 # show some reconstruction figures
 fig = plt.figure(figsize=(20, 20))
