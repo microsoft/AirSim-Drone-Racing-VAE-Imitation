@@ -22,7 +22,6 @@ def interp_vector(a, b, n):
         list_vecs.append(new_vec)
     return np.asarray(list_vecs)
 
-
 def randomQuadPose(x_range, y_range, z_range, yaw_range, pitch_range, roll_range):
     x = randomSample(x_range)
     y = randomSample(y_range)

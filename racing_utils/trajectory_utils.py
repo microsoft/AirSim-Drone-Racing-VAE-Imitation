@@ -45,9 +45,9 @@ def RedGateSpawnerCircle(client, num_gates, radius, radius_noise, height_range):
         client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
 
 
-def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, type_of_segment="circle"):
+def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, direction, type_of_segment="circle"):
     if type_of_segment == "circle":
-        (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius, radius_noise) for i in range(3)])
+        (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius, radius_noise, direction) for i in range(3)])
         # todo unreadable code
         # todo un-hardcode
         # airsim.Vector3r((x_t[t_i][0] - x_t[0][0]), (y_t[t_i][0] - y_t[0][0]), random.uniform(height_range[0], height_range[1])), \
@@ -82,7 +82,7 @@ def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
     return q
 
 
-def generate_circle(i, num_gates, race_course_radius, radius_amp=4.0):
+def generate_circle(i, num_gates, race_course_radius, radius_amp, direction):
     ts = [t / (num_gates) for t in range(0, num_gates)]
     samples = [0 for t in ts]
     derivatives = [0 for t in ts]
@@ -98,16 +98,24 @@ def generate_circle(i, num_gates, race_course_radius, radius_amp=4.0):
             if idx > 0:
                 radius = np.clip(radius, radius_list[idx-1] - max_radius_delta, radius_list[idx-1] + max_radius_delta)
                 radius = np.clip(radius, 0.0, radius)
-            samples[idx] = radius * math.cos(2.*math.pi * t)
-            derivatives[idx] = radius * -math.sin(2.*math.pi * t)
+            if direction == 0:
+                samples[idx] = radius * math.cos(2.*math.pi * t)
+                derivatives[idx] = radius * -math.sin(2.*math.pi * t)
+            else:
+                samples[idx] = radius * math.sin(2. * math.pi * t)
+                derivatives[idx] = radius * -math.cos(2. * math.pi * t)
     elif i == 1:
         for (idx, t) in enumerate(ts):
             radius = radius_list[idx]
             if idx > 0:
                 radius = np.clip(radius, radius_list[idx-1] - max_radius_delta, radius_list[idx-1] + max_radius_delta)
                 radius = np.clip(radius, 0.0, radius)
-            samples[idx] = radius * math.sin(2.*math.pi * t)
-            derivatives[idx] = radius * math.cos(2.*math.pi * t)
+            if direction == 0:
+                samples[idx] = radius * math.sin(2.*math.pi * t)
+                derivatives[idx] = radius * math.cos(2.*math.pi * t)
+            else:
+                samples[idx] = radius * math.cos(2. * math.pi * t)
+                derivatives[idx] = radius * math.sin(2. * math.pi * t)
     else:
         for (idx, t) in enumerate(ts):
             samples[idx] = 0.
