@@ -1,5 +1,12 @@
 from __future__ import division
 import random
+import math
+import copy
+import time
+import numpy as np
+import threading
+import pdb
+
 import os,sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 airsim_path = os.path.join(curr_dir, '..', 'airsim')
@@ -8,14 +15,14 @@ import setup_path
 import airsim
 import airsim.types
 import airsim.utils
-import math
-import copy
-import time
-import numpy as np
-import threading
-import pdb
+
+# import utils
+models_path = os.path.join(curr_dir, '..', 'racing_utils')
+sys.path.insert(0, models_path)
+import racing_utils
 
 random.seed(911)
+
 
 class GatePoseGenerator(object):
     def __init__(self):
@@ -114,6 +121,7 @@ class GatePoseGenerator(object):
         # elif type_of_segment == "cubic":
         return gate_poses
 
+
 class DroneRacingDataGenerator(object):
     def __init__(self, 
                 drone_name = "drone_0",
@@ -187,6 +195,14 @@ class DroneRacingDataGenerator(object):
         gate_indices_correct = sorted(range(len(gate_indices_bad)), key=lambda k:gate_indices_bad[k])
         self.gate_object_names_sorted = [gate_names_sorted_bad[gate_idx] for gate_idx in gate_indices_correct]
         self.curr_track_gate_poses = [self.client.simGetObjectPose(gate_name) for gate_name in self.gate_object_names_sorted]
+
+        # destroy all previous gates in map
+        [self.client.simDestroyObject(gate_object) for gate_object in self.client.simListSceneObjects(".*[Gg]ate.*")]
+
+        # create red gates in their places
+        for idx in range(len(self.gate_object_names_sorted)):
+            self.client.simSpawnObject(self.gate_object_names_sorted[idx], "RedGate16x16", self.curr_track_gate_poses[idx], 1.5)
+
         # for gate_pose in self.curr_track_gate_poses:
         #     print(gate_pose.position.x_val, gate_pose.position.y_val,gate_pose.position.z_val)
 
@@ -257,7 +273,7 @@ class DroneRacingDataGenerator(object):
         # self.next_track_gate_poses = self.track_generator.generate_gate_poses(num_gates=random.randint(6,10), race_course_radius=30.0, type_of_segment = "circle")
         return self.track_generator.generate_gate_poses(num_gates=len(self.curr_track_gate_poses), \
                                                             race_course_radius=self.race_course_radius, \
-                                                            type_of_segment = "circle")
+                                                            type_of_segment ="circle")
 
     def set_pose_of_gate_just_passed(self):
         if (self.last_gate_passed_idx == -1):
@@ -268,7 +284,6 @@ class DroneRacingDataGenerator(object):
         # self.client.simSetSegmentationObjectID(self.gate_object_names_sorted[self.last_gate_passed_idx], 100+self.last_gate_passed_idx);
         # todo do we really need this sleep
         time.sleep(0.05)  
-
 
     def set_pose_of_gate_passed_before_the_last_one(self):
         gate_idx_to_move = self.last_gate_passed_idx - 1
@@ -325,6 +340,7 @@ class DroneRacingDataGenerator(object):
         self.takeoff_with_moveOnSpline()
         self.set_num_training_laps(num_training_laps)
         self.start_expert_planner_controller_thread()
+
 
 if __name__ == "__main__":
     drone_racing_datagenerator = DroneRacingDataGenerator()

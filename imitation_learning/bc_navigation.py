@@ -2,7 +2,6 @@ from __future__ import division
 import time
 import numpy as np
 import vel_regressor
-import utils_reg
 import cv2
 import math
 
@@ -60,11 +59,11 @@ if __name__ == "__main__":
     time.sleep(0.01)
 
     # destroy all previous gates in map
-    utils_reg.AllGatesDestroyer(client)
+    racing_utils.trajectory_utils.AllGatesDestroyer(client)
 
     # spawn red gates in appropriate locations
-    # gate_poses = utils_reg.RedGateSpawner(client, num_gates=1, noise_amp=0)
-    gate_poses = utils_reg.RedGateSpawnerCircle(client, num_gates=13, radius=20, radius_noise=0.0, height_range=[10, 11])
+    # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=13, radius=20, radius_noise=0.0, height_range=[10, 11])
 
     # wait till takeoff complete
     vel_max = 3.0
