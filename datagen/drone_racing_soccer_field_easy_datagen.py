@@ -1,11 +1,9 @@
 from __future__ import division
 import random
 import math
-import copy
 import time
 import numpy as np
 import threading
-import pdb
 
 import os,sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +52,7 @@ class GatePoseGenerator(object):
 
 
         # not a circle, but hey it's random-ish. and the wrong derivative actually make the track challenging
-        # come back again later.  
+        # come back again later.
         if i == 0:
             for (idx, t) in enumerate(ts):
                 radius = radius_list[idx]
@@ -83,7 +81,7 @@ class GatePoseGenerator(object):
         #     samples = [race_course_radius * (math.sin(2.*math.pi * t) if i == 0 else math.cos(2.*math.pi * t) if i == 1 else 0) for t in ts]
         #     derivatives = [race_course_radius * (math.cos(2.*math.pi * t) if i == 0 else -math.sin(2.*math.pi * t) if i == 1 else 0) for t in ts]
         return list(zip(samples, derivatives))
-  
+
     def quaternionFromUnitGradient(self, dx_dt, dy_dt, dz_dt):
         r0 = self.default_gate_facing_vector
         q = airsim.Quaternionr(
@@ -207,7 +205,12 @@ class DroneRacingDataGenerator(object):
         #     print(gate_pose.position.x_val, gate_pose.position.y_val,gate_pose.position.z_val)
 
     def takeoff_with_moveOnSpline(self, takeoff_height=1.2, vel_max=15.0, acc_max=5.0):
-        self.client.moveOnSplineAsync([airsim.Vector3r(0, 0, -takeoff_height)], vel_max=vel_max, acc_max=acc_max, vehicle_name=self.drone_name).join()
+        self.client.moveOnSplineAsync(path=[airsim.Vector3r(0, 0, -takeoff_height)],
+                                      vel_max=vel_max, acc_max=acc_max,
+                                      add_curr_odom_position_constraint=True,
+                                      add_curr_odom_velocity_constraint=True,
+                                      viz_traj=True,
+                                      vehicle_name=self.drone_name).join()
 
     def expert_planner_controller_callback(self):
         self.curr_multirotor_state = self.client.getMultirotorState()
@@ -262,7 +265,12 @@ class DroneRacingDataGenerator(object):
         self.acc_max = acc_max
 
     def fly_to_next_gate_with_moveOnSpline(self):
-        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position], vel_max=self.vel_max, acc_max=self.acc_max, vehicle_name=self.drone_name, add_curr_odom_position_constraint=True, add_curr_odom_velocity_constraint= True)
+        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position],
+                                                         vel_max=self.vel_max, acc_max=self.acc_max,
+                                                         add_curr_odom_position_constraint=True,
+                                                         add_curr_odom_velocity_constraint=True,
+                                                         viz_traj=True,
+                                                         vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
     def join_all_pending_futures(self):
@@ -310,7 +318,7 @@ class DroneRacingDataGenerator(object):
         # todo unhardcode 100+, ensure unique object ids or just set all non-gate objects to 0, and gates to range(self.next_track_gate_poses)... not needed for hackathon
         # self.client.simSetSegmentationObjectID(self.gate_object_names_sorted[self.last_gate_passed_idx], 100+self.last_gate_passed_idx);
         # todo do we really need this sleep
-        time.sleep(0.05)  
+        time.sleep(0.05)
 
     def start_expert_planner_controller_thread(self):
         if not self.is_expert_planner_controller_thread_active:

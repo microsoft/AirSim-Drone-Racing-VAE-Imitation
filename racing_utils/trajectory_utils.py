@@ -113,3 +113,10 @@ def generate_circle(i, num_gates, race_course_radius, radius_amp=4.0):
             samples[idx] = 0.
             derivatives[idx] = 0.
     return list(zip(samples, derivatives))
+
+
+
+
+
+
+
