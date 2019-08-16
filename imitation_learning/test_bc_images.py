@@ -19,11 +19,13 @@ import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
 save_video = True
-video_file = '/home/rb/Videos/real_life/bc_full_video_8.avi'
-data_dir = '/home/rb/data/real_life/video_8'
+video_file = '/home/rb/Videos/real_life/bc_new_full_video_7.avi'
+data_dir = '/home/rb/data/real_life/video_7'
 training_mode = 'full'  # 'full' or 'latent'
-bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
+# bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
 # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
+bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_160.ckpt'
+# bc_weights_path = '/home/rb/data/model_outputs/bc_new_latent_0/bc_model_310.ckpt'
 cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
 n_z = 20
 batch_size = 64
@@ -71,7 +73,7 @@ if save_video:
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(video_file, fourcc, 20.0, (img_display_res, img_display_res))
 images_np = ((images_np+1.0)/2.0*255.0).astype(np.uint8)
-vel_scale = 10
+vel_scale = 20
 yaw_scale = 40
 for img_idx in range(predictions.shape[0]):
     img = images_np[img_idx,:]

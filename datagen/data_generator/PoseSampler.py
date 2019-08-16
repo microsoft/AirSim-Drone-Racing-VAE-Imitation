@@ -98,7 +98,7 @@ class PoseSampler:
         img_batch_1 = np.array([img_resized])
         # img_batch_1 = np.reshape(img_resized, (-1,) + img_resized.shape)
         gate_pose = self.gate_regressor.predict_gate_pose(img_batch_1, p_o_b)
-        self.client.plot_tf([gate_pose], duration=20.0)
+        # self.client.plot_tf([gate_pose], duration=20.0)
 
 
     # def update_debug(self):
@@ -146,7 +146,9 @@ class PoseSampler:
     #             self.curr_idx += 1
 
     def configureEnvironment(self):
-        [self.client.simDestroyObject(gate_object) for gate_object in self.client.simListSceneObjects(".*[Gg]ate.*")]
+        for gate_object in self.client.simListSceneObjects(".*[Gg]ate.*"):
+            self.client.simDestroyObject(gate_object)
+            time.sleep(0.05)
         if self.with_gate:
             self.tgt_name = self.client.simSpawnObject("gate", "RedGate16x16", Pose(position_val=Vector3r(0,0,15)), 1.5)
             # self.tgt_name = self.client.simSpawnObject("gate", "CheckeredGate16x16", Pose(position_val=Vector3r(0,0,15)))

@@ -1,3 +1,4 @@
+import time
 from PoseSampler import *
 
 num_samples = 100
@@ -10,4 +11,4 @@ for idx in range(pose_sampler.num_samples):
     pose_sampler.update()
     if idx % 1000 == 0:
         print('Num samples: {}'.format(idx))
-#     # sleep(0.3)   #comment this out once you like your ranges of values
+    time.sleep(0.3)   #comment this out once you like your ranges of values

@@ -4,7 +4,7 @@ import cv2
 import time
 
 # open data
-data_path = '/home/rb/data/il_datasets/il_3'
+data_path = '/home/rb/data/il_datasets/bc_0'
 vel_table = np.loadtxt(data_path + '/proc_vel.txt', delimiter=',').astype(np.float32)
 with open(data_path + '/proc_images.txt') as f:
     img_table = f.read().splitlines()

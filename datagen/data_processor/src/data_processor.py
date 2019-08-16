@@ -216,9 +216,9 @@ if __name__ == "__main__":
     #     args.images_folder
     # )
     run(
-        '/home/rb/data/il_datasets/il_3/moveOnSpline_vel_cmd.txt',
-        '/home/rb/data/il_datasets/il_3/images.txt',
-        '/home/rb/data/il_datasets/il_3/proc_vel.txt',
-        '/home/rb/data/il_datasets/il_3/proc_images.txt',
-        '/home/rb/data/il_datasets/il_3/images'
+        '/home/rb/data/il_datasets/bc_3/moveOnSpline_vel_cmd.txt',
+        '/home/rb/data/il_datasets/bc_3/images.txt',
+        '/home/rb/data/il_datasets/bc_3/proc_vel.txt',
+        '/home/rb/data/il_datasets/bc_3/proc_images.txt',
+        '/home/rb/data/il_datasets/bc_3/images'
     )

@@ -130,7 +130,7 @@ def get_yaw_base(p_o_b):
 
 
 # scale dictates speed!
-def get_gate_facing_vector_from_quaternion(airsim_quat, scale=1.0):
+def get_gate_facing_vector_from_quaternion(airsim_quat, direction, scale=1.0,):
     q = np.array([airsim_quat.w_val, airsim_quat.x_val, airsim_quat.y_val, airsim_quat.z_val], dtype=np.float64, copy=True)
     n = np.dot(q, q)
     # todo check for too low floats and return identity
@@ -143,8 +143,12 @@ def get_gate_facing_vector_from_quaternion(airsim_quat, scale=1.0):
                                 [    q[1, 2]+q[3, 0], 1.0-q[1, 1]-q[3, 3],     q[2, 3]-q[1, 0], 0.0],
                                 [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2], 0.0],
                                 [                0.0,                 0.0,                 0.0, 1.0]])
-    gate_facing_vector = rotation_matrix[:-1,1]
-    return airsim.Vector3r(scale*gate_facing_vector[0], scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+    gate_facing_vector = rotation_matrix[:-1, 1]
+    if direction == 0:
+        return airsim.Vector3r(scale*gate_facing_vector[0], scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+    else:
+        return airsim.Vector3r(-scale*gate_facing_vector[0], -scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+
 
 
 def getGatePoseWorld(p_o_b, r, theta, psi, phi_rel):

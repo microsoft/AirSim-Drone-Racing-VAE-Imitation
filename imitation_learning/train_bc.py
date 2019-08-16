@@ -16,8 +16,10 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/il_datasets/il_3'
-output_dir = '/home/rb/data/model_outputs/bc_latent_2'
+# data_dir = '/home/rb/data/il_datasets/bc_1'
+data_dir_list = ['/home/rb/data/il_datasets/bc_1',
+                 '/home/rb/data/il_datasets/bc_2']
+output_dir = '/home/rb/data/model_outputs/bc_new_latent_0'
 training_mode = 'latent'  # 'full' or 'latent'
 cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
 n_z = 20
@@ -80,7 +82,8 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # load dataset
 print('Starting dataset')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_txt(data_dir, batch_size, img_res, data_mode='train')
+# train_ds, test_ds = racing_utils.dataset_utils.create_dataset_txt(data_dir, batch_size, img_res, data_mode='train')
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_multiple_sources(data_dir_list, batch_size, img_res, data_mode='train')
 print('Done with dataset')
 
 # create models

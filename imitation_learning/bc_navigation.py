@@ -32,8 +32,10 @@ def process_image(client, img_res):
 
 
 def move_drone(client, vel_cmd):
-    vel_cmd[0:2] = vel_cmd[0:2] * 0.4
-    vel_cmd[3] = vel_cmd[3] * 0.8
+    # good multipliers originally: 0.4 for vel, 0.8 for yaw
+    # good multipliers new policies: 0.8 for vel, 0.8 for yaw
+    vel_cmd[0:2] = vel_cmd[0:2] * 1.0
+    vel_cmd[3] = vel_cmd[3] * 1.0
     # yaw rate is given in deg/s!! not rad/s
     yaw_mode = airsim.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
     client.moveByVelocityAsync(vel_cmd[0], vel_cmd[1], vel_cmd[2], duration=0.1, yaw_mode=yaw_mode)
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     client = airsim.MultirotorClient()
     client.confirmConnection()
     # client.simLoadLevel('Soccer_Field_Easy')
-    client.simLoadLevel('Soccer_Field_Medium')
+    client.simLoadLevel('Soccer_Field_Easy')
     time.sleep(2)
     # should match the names in settings.json
     drone_name = "drone_0"
@@ -63,15 +65,15 @@ if __name__ == "__main__":
 
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=13, radius=20, radius_noise=0.0, height_range=[10, 11])
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=14, radius=25, radius_noise=1.0, height_range=[0, -4])
 
     # wait till takeoff complete
     vel_max = 3.0
     acc_max = 3.0
 
     time.sleep(1.0)
-    takeoff_position = airsim.Vector3r(20, 2, 10)
-    takeoff_orientation = airsim.Vector3r(0, 1, 0)
+    takeoff_position = airsim.Vector3r(25, 5, -2)
+    takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
     # takeoff_orientation = airsim.Vector3r(1, 0, 0)
     # client.plot_tf([takeoff_pose], duration=20.0, vehicle_name=drone_name)
@@ -84,7 +86,9 @@ if __name__ == "__main__":
 
     training_mode = 'latent'  # 'full' or 'latent'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_160.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_new_latent_0/bc_model_310.ckpt'
     cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
     vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path, cmvae_weights_path=cmvae_weights_path)
 
@@ -96,4 +100,4 @@ if __name__ == "__main__":
         print('Before sending vel cmd')
         move_drone(client, vel_cmd)
         print('After sending vel cmd')
-        time.sleep(0.05)
+        # time.sleep(0.05)

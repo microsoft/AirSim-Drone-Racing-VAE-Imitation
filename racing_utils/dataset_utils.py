@@ -294,6 +294,28 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train'):
         return img_test, v_test
 
 
+def create_dataset_multiple_sources(data_dir_list, batch_size, res, data_mode='train'):
+    # load all the images and velocities in one single large dataset
+    images_np = np.empty((0,res,res,3)).astype(np.float32)
+    vel_table = np.empty((0,4)).astype(np.float32)
+    for data_dir in data_dir_list:
+        img_array, v_array = create_dataset_txt(data_dir, batch_size, res, data_mode='test')
+        images_np = np.concatenate((images_np, img_array), axis=0)
+        vel_table = np.concatenate((vel_table, v_array), axis=0)
+    # separate the actual dataset:
+    img_train, img_test, v_train, v_test = train_test_split(images_np, vel_table, test_size=0.1, random_state=42)
+    if data_mode == 'train':
+        # convert to tf format dataset and prepare batches
+        ds_train = tf.data.Dataset.from_tensor_slices((img_train, v_train)).batch(batch_size)
+        ds_test = tf.data.Dataset.from_tensor_slices((img_test, v_test)).batch(batch_size)
+        return ds_train, ds_test
+    elif data_mode == 'test':
+        return img_test, v_test
+
+
+
+
+
 # def create_dataset_csv(data_dir, batch_size, res, num_channels, max_size=None):
 #     # prepare image dataset from a folder
 #     files_list = glob.glob(os.path.join(data_dir, 'images/*.png'))

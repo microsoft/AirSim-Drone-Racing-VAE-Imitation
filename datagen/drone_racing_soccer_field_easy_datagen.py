@@ -19,7 +19,7 @@ models_path = os.path.join(curr_dir, '..', 'racing_utils')
 sys.path.insert(0, models_path)
 import racing_utils
 
-random.seed(911)
+random.seed(999)
 
 ###########################################
 
@@ -29,6 +29,7 @@ race_course_radius = 25
 radius_noise = 3
 height_range = [0, -4]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
+perpendicular = True  # if 1, then move with velocity constraint
 vel_max = 5.0
 acc_max = 10.0
 
@@ -43,6 +44,7 @@ class DroneRacingDataGenerator(object):
                 radius_noise,
                 height_range,
                 direction,
+                perpendicular,
                 odom_loop_rate_sec,
                 vel_max,
                 acc_max):
@@ -67,6 +69,7 @@ class DroneRacingDataGenerator(object):
         self.radius_noise = radius_noise
         self.height_range = height_range
         self.direction = direction
+        self.perpendicular=perpendicular
 
         self.vel_max = vel_max
         self.acc_max = acc_max
@@ -194,23 +197,24 @@ class DroneRacingDataGenerator(object):
                 # self.fly_to_next_gate_with_moveToPostion()
 
     def fly_to_next_gate_with_moveOnSpline(self):
-        print(self.curr_track_gate_poses[self.next_gate_idx].position)
-        print(self.curr_track_gate_poses[self.next_next_gate_idx].position)
-        self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position,
-                                                          self.curr_track_gate_poses[self.next_next_gate_idx].position],
-                                                         vel_max=self.vel_max, acc_max=self.acc_max,
-                                                         add_curr_odom_position_constraint=True,
-                                                         add_curr_odom_velocity_constraint=True,
-                                                         viz_traj=True,
-                                                         vehicle_name=self.drone_name)
-        # gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, scale=vel_max/2.0)
-        # self.last_future = self.client.moveOnSplineVelConstraintsAsync([self.curr_track_gate_poses[self.next_gate_idx].position],
-        #                                                                [gate_vector],
-        #                                                                vel_max=self.vel_max, acc_max=self.acc_max,
-        #                                                                add_curr_odom_position_constraint=True,
-        #                                                                add_curr_odom_velocity_constraint=True,
-        #                                                                viz_traj=True,
-        #                                                                vehicle_name=self.drone_name)
+        # print(self.curr_track_gate_poses[self.next_gate_idx].position)
+        # print(self.curr_track_gate_poses[self.next_next_gate_idx].position)
+        if not self.perpendicular:
+            self.last_future = self.client.moveOnSplineAsync([self.curr_track_gate_poses[self.next_gate_idx].position],
+                                                             vel_max=self.vel_max, acc_max=self.acc_max,
+                                                             add_curr_odom_position_constraint=True,
+                                                             add_curr_odom_velocity_constraint=True,
+                                                             viz_traj=True,
+                                                             vehicle_name=self.drone_name)
+        else:
+            gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, self.direction, scale=vel_max/1.5)
+            self.last_future = self.client.moveOnSplineVelConstraintsAsync([self.curr_track_gate_poses[self.next_gate_idx].position],
+                                                                           [gate_vector],
+                                                                           vel_max=self.vel_max, acc_max=self.acc_max,
+                                                                           add_curr_odom_position_constraint=True,
+                                                                           add_curr_odom_velocity_constraint=True,
+                                                                           viz_traj=True,
+                                                                           vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
     def join_all_pending_futures(self):
@@ -298,6 +302,7 @@ if __name__ == "__main__":
                                                           radius_noise=radius_noise,
                                                           height_range=height_range,
                                                           direction=direction,
+                                                          perpendicular=perpendicular,
                                                           odom_loop_rate_sec=0.015,
                                                           vel_max=vel_max,
                                                           acc_max=acc_max

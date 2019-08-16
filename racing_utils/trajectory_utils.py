@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import random
 import math
+import time
 
 import os, sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +27,9 @@ def MoveCheckeredGates(client):
 
 
 def AllGatesDestroyer(client):
-    [client.simDestroyObject(gate_object) for gate_object in client.simListSceneObjects(".*[Gg]ate.*")]
+    for gate_object in client.simListSceneObjects(".*[Gg]ate.*"):
+        client.simDestroyObject(gate_object)
+        time.sleep(0.05)
 
 
 def RedGateSpawner(client, num_gates, noise_amp):
@@ -36,13 +39,15 @@ def RedGateSpawner(client, num_gates, noise_amp):
         pose = Pose(Vector3r(10+idx*9, noise*5.0, 10.0), Quaternionr(0.0, 0.0, 0.707, 0.707))
         client.simSpawnObject("gate_"+str(idx), "RedGate16x16", pose, 1.5)
         gate_poses.append(pose)
+        time.sleep(0.05)
     return gate_poses
 
 
 def RedGateSpawnerCircle(client, num_gates, radius, radius_noise, height_range):
-    track = generate_gate_poses(num_gates=num_gates, race_course_radius=radius, radius_noise=radius_noise, height_range=height_range)
+    track = generate_gate_poses(num_gates=num_gates, race_course_radius=radius, radius_noise=radius_noise, height_range=height_range, direction=0)
     for idx in range(num_gates):
         client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
+        time.sleep(0.05)
 
 
 def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, direction, type_of_segment="circle"):

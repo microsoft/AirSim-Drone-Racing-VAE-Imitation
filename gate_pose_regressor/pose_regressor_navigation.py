@@ -34,8 +34,8 @@ def process_image(client, img_res):
 def move_drone(client, gate_pose):
     # client.enableApiControl(True, vehicle_name=drone_name)
     # client.moveOnSplineAsync([gate_pose.position], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name)
-    gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(gate_pose.orientation, scale=1.0)
-    # client.plot_tf([airsim.Pose(gate_pose.position + gate_vector, gate_pose.orientation)], duration=20.0, vehicle_name=drone_name)
+    gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(gate_pose.orientation, direction=0, scale=1.0)
+    client.plot_tf([airsim.Pose(gate_pose.position + gate_vector, gate_pose.orientation)], duration=20.0, vehicle_name=drone_name)
     # client.plot_tf([gate_pose], duration=20.0, vehicle_name=drone_name)
     # client.moveOnSplineAsync([gate_pose.position], [gate_vector], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=True)
     # client.moveOnSplineVelConstraintsAsync([gate_pose.position], [gate_vector], add_curr_odom_position_constraint=True, add_curr_odom_velocity_constraint=True, vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=True)
@@ -43,7 +43,7 @@ def move_drone(client, gate_pose):
                              add_curr_odom_position_constraint=True,
                              add_curr_odom_velocity_constraint=True,
                              vel_max=vel_max, acc_max=acc_max,
-                             vehicle_name=drone_name, viz_traj=False)
+                             vehicle_name=drone_name, viz_traj=True)
     # client.moveOnSplineVelConstraintsAsync([gate_pose.position-gate_vector],
     #                                        [gate_vector],
     #                                        add_curr_odom_position_constraint=True,
