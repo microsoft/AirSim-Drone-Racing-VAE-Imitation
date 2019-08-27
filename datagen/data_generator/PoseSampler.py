@@ -58,9 +58,9 @@ class PoseSampler:
         self.client = airsim.MultirotorClient()
         self.configureEnvironment()
         # TODO: remove this normally -- just for debugging
-        # path_weights = '/home/rb/data/model_outputs/reg_5/reg_model_20.ckpt'
-        path_weights = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_15.ckpt'
-        self.gate_regressor = gate_pose_regressor.gate_regressor.GateRegressor(regressor_type='cmvae', path_weights=path_weights)
+        # # path_weights = '/home/rb/data/model_outputs/reg_5/reg_model_20.ckpt'
+        # path_weights = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_15.ckpt'
+        # self.gate_regressor = gate_pose_regressor.gate_regressor.GateRegressor(regressor_type='cmvae', path_weights=path_weights)
 
 
     def update(self):
@@ -90,15 +90,15 @@ class PoseSampler:
         self.writePosToFile(r, theta, psi, phi_rel)
         self.curr_idx += 1
         #TODO: just for debug
-        image_response = self.client.simGetImages([airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]
-        img_1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)  # get numpy array
-        img_rgb = img_1d.reshape(image_response.height, image_response.width, 3)  # reshape array to 4 channel image array H X W X 3
-        # img_bgr = racing_utils.dataset_utils.convert_rgb2bgr(img_rgb)
-        img_resized = cv2.resize(img_rgb, (64, 64)).astype(np.float32)
-        img_batch_1 = np.array([img_resized])
-        # img_batch_1 = np.reshape(img_resized, (-1,) + img_resized.shape)
-        gate_pose = self.gate_regressor.predict_gate_pose(img_batch_1, p_o_b)
-        # self.client.plot_tf([gate_pose], duration=20.0)
+        # image_response = self.client.simGetImages([airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]
+        # img_1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)  # get numpy array
+        # img_rgb = img_1d.reshape(image_response.height, image_response.width, 3)  # reshape array to 4 channel image array H X W X 3
+        # # img_bgr = racing_utils.dataset_utils.convert_rgb2bgr(img_rgb)
+        # img_resized = cv2.resize(img_rgb, (64, 64)).astype(np.float32)
+        # img_batch_1 = np.array([img_resized])
+        # # img_batch_1 = np.reshape(img_resized, (-1,) + img_resized.shape)
+        # gate_pose = self.gate_regressor.predict_gate_pose(img_batch_1, p_o_b)
+        # # self.client.plot_tf([gate_pose], duration=20.0)
 
 
     # def update_debug(self):
