@@ -31,7 +31,8 @@ class VelRegressor():
             self.bc_model = racing_models.bc_full.BcFull()
             self.bc_model.load_weights(bc_weights_path)
         elif self.regressor_type == 'latent':
-            self.cmvae_model = racing_models.cmvae.Cmvae(n_z=20, gate_dim=4, res=64, trainable_model=False)
+            # self.cmvae_model = racing_models.cmvae.Cmvae(n_z=20, gate_dim=4, res=64, trainable_model=False)
+            self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
             self.cmvae_model.load_weights(cmvae_weights_path)
             self.bc_model = racing_models.bc_latent.BcLatent()
             self.bc_model.load_weights(bc_weights_path)
@@ -45,7 +46,7 @@ class VelRegressor():
             predictions = self.bc_model(z)
         predictions = predictions.numpy()
         predictions = racing_utils.dataset_utils.de_normalize_v(predictions)
-        print('Predicted body vel: \n {}'.format(predictions[0]))
+        # print('Predicted body vel: \n {}'.format(predictions[0]))
         v_xyz_world = racing_utils.geom_utils.convert_t_body_2_world(airsim.Vector3r(predictions[0,0], predictions[0,1], predictions[0,2]), p_o_b.orientation)
         return np.array([v_xyz_world.x_val, v_xyz_world.y_val, v_xyz_world.z_val, predictions[0,3]])
 

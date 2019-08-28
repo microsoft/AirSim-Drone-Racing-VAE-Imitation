@@ -19,15 +19,16 @@ import racing_utils
 # data_dir = '/home/rb/data/il_datasets/bc_1'
 data_dir_list = ['/home/rb/data/il_datasets/bc_1',
                  '/home/rb/data/il_datasets/bc_2']
-output_dir = '/home/rb/data/model_outputs/bc_new_latent_0'
-training_mode = 'latent'  # 'full' or 'latent'
-cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
-n_z = 20
+output_dir = '/home/rb/data/model_outputs/bc_new_full_0'
+training_mode = 'full'  # 'full' or 'latent'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
+cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
+n_z = 10
 batch_size = 32
 epochs = 10000
 img_res = 64
 max_size = None  # default is None
-learning_rate = 1e-2
+learning_rate = 1e-3  # 1e-2 for latent, 1e-3 for full
 
 ###########################################
 # CUSTOM FUNCTIONS
@@ -90,7 +91,8 @@ print('Done with dataset')
 if training_mode == 'full':
     bc_model = racing_models.bc_full.BcFull()
 elif training_mode == 'latent':
-    cmvae_model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    # cmvae_model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+    cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
     cmvae_model.load_weights(cmvae_weights_path)
     cmvae_model.trainable = False
     bc_model = racing_models.bc_latent.BcLatent()
@@ -127,6 +129,6 @@ for epoch in range(epochs):
         tf.summary.scalar('test_loss_rec_gate', test_loss_rec_v.result(), step=epoch)
     print('Epoch {} | Train L_gate: {} | Test L_gate: {}'
           .format(epoch, train_loss_rec_v.result(), test_loss_rec_v.result()))
-    reset_metrics() # reset all the accumulators of metrics
+    reset_metrics()  # reset all the accumulators of metrics
 
 print('bla')

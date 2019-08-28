@@ -21,10 +21,12 @@ import racing_utils
 data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
 # data_dir = '/home/rb/data/real_life/video_0'
 # data_dir = '/home/rb/data/real_life/hand_picked_0'
-weights_path = '/home/rb/data/model_outputs/cmvae_test/cmvae_model_85.ckpt'
-n_z = 20
+# weights_path = '/home/rb/data/model_outputs/cmvae_test/cmvae_model_85.ckpt'
+# weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_1/cmvae_model_15.ckpt'
+weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
+n_z = 10
 img_res = 64
-read_table = False
+read_table = True
 
 num_imgs_display = 50
 columns = 10
@@ -34,8 +36,8 @@ num_interp_z = 10
 idx_close = 7
 idx_far = 39
 
-z_range_mural = [-1.0, 1.0]
-z_num_mural = 10
+z_range_mural = [-0.03, 0.03]
+z_num_mural = 31
 
 ###########################################
 
@@ -53,7 +55,8 @@ images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_d
 print('Done with dataset')
 
 # create model
-model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+# model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 model.load_weights(weights_path)
 
 img_recon, gate_recon, means, stddev, z = model(images_np, mode=0)
@@ -70,70 +73,71 @@ gate_recon = racing_utils.dataset_utils.de_normalize_gate(gate_recon)
 #     sys.exit()
 
 # get stats for gate reconstruction
-# racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
+racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
 
 # show some reconstruction figures
-# fig = plt.figure(figsize=(20, 20))
-# for i in range(1, num_imgs_display+1):
-#     idx_orig = (i-1)*2+1
-#     fig.add_subplot(rows, columns, idx_orig)
-#     img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[i - 1, :])
-#     plt.imshow(img_display)
-#     fig.add_subplot(rows, columns, idx_orig+1)
-#     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i-1, :])
-#     plt.imshow(img_display)
-# fig.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_results.png'))
-# plt.show()
-#
-# # show interpolation btw two images in latent space
-# z_close = z[idx_close, :]
-# z_far = z[idx_far, :]
-# z_interp = racing_utils.geom_utils.interp_vector(z_close, z_far, num_interp_z)
-#
-# # get the image predictions
-# img_recon_interp, gate_recon_interp = model.decode(z_interp, mode=0)
-# img_recon_interp = img_recon_interp.numpy()
-# gate_recon_interp = gate_recon_interp.numpy()
-#
-# # de-normalization of gates and images
-# img_recon_interp = ((img_recon_interp + 1.0) / 2.0 * 255.0).astype(np.uint8)
-# gate_recon_interp = racing_utils.dataset_utils.de_normalize_gate(gate_recon_interp)
-#
-# # join predictions with array and print
-# indices = np.array([np.arange(num_interp_z)]).transpose()
-# results = np.concatenate((indices, gate_recon_interp), axis=1)
-# print('Img index | Predictions: = \n{}'.format(results))
-#
-# # plot the interpolated images
-# fig2 = plt.figure(figsize=(96, 96))
-# columns = num_interp_z + 2
-# rows = 1
-# fig2.add_subplot(rows, columns, 1)
-# img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_close, :])
-# plt.imshow(img_display)
-# for i in range(1, num_interp_z + 1):
-#     fig2.add_subplot(rows, columns, i+1)
-#     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp[i - 1, :])
-#     plt.imshow(img_display)
-# fig2.add_subplot(rows, columns, num_interp_z + 2)
-# img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
-# plt.imshow(img_display)
-# fig2.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_interpolation_results.png'))
-# plt.show()
+fig = plt.figure(figsize=(20, 20))
+for i in range(1, num_imgs_display+1):
+    idx_orig = (i-1)*2+1
+    fig.add_subplot(rows, columns, idx_orig)
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[i - 1, :])
+    plt.imshow(img_display)
+    fig.add_subplot(rows, columns, idx_orig+1)
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon[i-1, :])
+    plt.imshow(img_display)
+fig.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_results.png'))
+plt.show()
+
+# show interpolation btw two images in latent space
+z_close = z[idx_close, :]
+z_far = z[idx_far, :]
+z_interp = racing_utils.geom_utils.interp_vector(z_close, z_far, num_interp_z)
+
+# get the image predictions
+img_recon_interp, gate_recon_interp = model.decode(z_interp, mode=0)
+img_recon_interp = img_recon_interp.numpy()
+gate_recon_interp = gate_recon_interp.numpy()
+
+# de-normalization of gates and images
+img_recon_interp = ((img_recon_interp + 1.0) / 2.0 * 255.0).astype(np.uint8)
+gate_recon_interp = racing_utils.dataset_utils.de_normalize_gate(gate_recon_interp)
+
+# join predictions with array and print
+indices = np.array([np.arange(num_interp_z)]).transpose()
+results = np.concatenate((indices, gate_recon_interp), axis=1)
+print('Img index | Predictions: = \n{}'.format(results))
+
+# plot the interpolated images
+fig2 = plt.figure(figsize=(96, 96))
+columns = num_interp_z + 2
+rows = 1
+fig2.add_subplot(rows, columns, 1)
+img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_close, :])
+plt.imshow(img_display)
+for i in range(1, num_interp_z + 1):
+    fig2.add_subplot(rows, columns, i+1)
+    img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp[i - 1, :])
+    plt.imshow(img_display)
+fig2.add_subplot(rows, columns, num_interp_z + 2)
+img_display = racing_utils.dataset_utils.convert_bgr2rgb(images_np[idx_far, :])
+plt.imshow(img_display)
+fig2.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_interpolation_results.png'))
+plt.show()
 
 
 # new plot traveling through latent space
 fig3 = plt.figure(figsize=(96, 96))
-columns = num_interp_z
+columns = z_num_mural
 rows = n_z
 z_values = racing_utils.geom_utils.interp_vector(z_range_mural[0], z_range_mural[1], z_num_mural)
-for i in range(1, num_interp_z + 1):
-    fig3.add_subplot(rows, columns, i+1)
-    z = np.zeros((n_z,1)).astype(np.float32)
-    z[i/columns] = z_values[i%columns-1]
-    img_recon_interp, _ = model.decode(num_interp_z, mode=0)
+for i in range(1, z_num_mural*n_z + 1):
+    fig3.add_subplot(rows, columns, i)
+    z = np.zeros((1, n_z)).astype(np.float32)
+    z[0, (i-1)/columns] = z_values[i%columns-1]
+    # print (z)
+    img_recon_interp, gate_recon_interp = model.decode(z, mode=0)
     img_recon_interp = img_recon_interp.numpy()
-    img_recon_interp = ((img_recon_interp + 1.0) / 2.0 * 255.0).astype(np.uint8)
+    img_recon_interp = ((img_recon_interp[0, :] + 1.0) / 2.0 * 255.0).astype(np.uint8)
     img_display = racing_utils.dataset_utils.convert_bgr2rgb(img_recon_interp)
     plt.imshow(img_display)
 fig3.savefig(os.path.join('/home/rb/Pictures', 'z_mural.png'))

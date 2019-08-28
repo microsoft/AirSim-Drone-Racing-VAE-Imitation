@@ -84,20 +84,39 @@ if __name__ == "__main__":
     time.sleep(1.0)
     img_res = 64
 
-    training_mode = 'latent'  # 'full' or 'latent'
+    training_mode = 'full'  # 'full' or 'latent'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_160.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_new_latent_0/bc_model_310.ckpt'
-    cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_180.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_latent_0/bc_model_770.ckpt'
+    # cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
+    cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
     vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path, cmvae_weights_path=cmvae_weights_path)
 
+    count = 0
+    max_count = 50
+    times_net = np.zeros((max_count,))
+    times_loop = np.zeros((max_count,))
     while True:
+        start_time = time.time()
         img_batch_1, cam_pos, cam_orientation = process_image(client, img_res)
+        elapsed_time_net = time.time() - start_time
+        times_net[count] = elapsed_time_net
         p_o_b = airsim.types.Pose(cam_pos, cam_orientation)
         vel_cmd = vel_regressor.predict_velocities(img_batch_1, p_o_b)
-        print(vel_cmd)
-        print('Before sending vel cmd')
+        # print(vel_cmd)
+        # print('Before sending vel cmd')
         move_drone(client, vel_cmd)
-        print('After sending vel cmd')
+        # print('After sending vel cmd')
         # time.sleep(0.05)
+        elapsed_time_loop = time.time() - start_time
+        times_loop[count] = elapsed_time_loop
+        count = count + 1
+        if count == max_count:
+            count = 0
+            avg_time = np.mean(times_net)
+            avg_freq = 1.0/avg_time
+            print('Avg network time over {} iterations: {} ms | {} Hz'.format(max_count, avg_time*1000, avg_freq))
+            avg_time = np.mean(times_loop)
+            avg_freq = 1.0 / avg_time
+            print('Avg loop time over {} iterations: {} ms | {} Hz'.format(max_count, avg_time * 1000, avg_freq))

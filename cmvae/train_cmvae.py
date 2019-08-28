@@ -17,10 +17,10 @@ import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
 data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
-output_dir = '/home/rb/data/model_outputs/cmvae_test'
+output_dir = '/home/rb/data/model_outputs/cmvae_directZ_0'
 batch_size = 32
 epochs = 10000
-n_z = 20
+n_z = 10
 img_res = 64
 max_size = 300000  # default is None
 learning_rate = 1e-4
@@ -53,9 +53,9 @@ def reset_metrics():
 def regulate_weights(epoch):
     # for beta
     if epoch < 10.0:
-        beta = 1.0
+        beta = 8.0
     else:
-        beta = 1.0
+        beta = 8.0
     # t = 10
     # beta_min = 0.0  #0.000001
     # beta_max = 1.0  #0.0001
@@ -164,7 +164,8 @@ train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batc
 print('Done with dataset')
 
 # create model
-model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+# model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics
