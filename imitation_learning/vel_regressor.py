@@ -24,8 +24,7 @@ import racing_utils
 class VelRegressor():
     def __init__(self, regressor_type, bc_weights_path, cmvae_weights_path=None):
         self.regressor_type = regressor_type
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
-        os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
         # create models
         if self.regressor_type == 'full':
             self.bc_model = racing_models.bc_full.BcFull()

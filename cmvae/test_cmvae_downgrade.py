@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 import tensorflow as tf
 import os
 import sys
@@ -41,6 +42,10 @@ z_num_mural = 31
 
 ###########################################
 
+tf.enable_eager_execution()
+print("TensorFlow version: {}".format(tf.__version__))
+print("Eager execution: {}".format(tf.executing_eagerly()))
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 # 0 = all messages are logged (default behavior)
 # 1 = INFO messages are not printed
@@ -57,7 +62,11 @@ print('Done with dataset')
 # create model
 # model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+# model = racing_models.transformer.TestNet()
 model.load_weights(weights_path)
+
+# model.load_weights('/home/rb/test_model/test_model.ckpt')
+# bla = model(images_np)
 
 img_recon, gate_recon, means, stddev, z = model(images_np, mode=0)
 img_recon = img_recon.numpy()
@@ -133,7 +142,7 @@ z_values = racing_utils.geom_utils.interp_vector(z_range_mural[0], z_range_mural
 for i in range(1, z_num_mural*n_z + 1):
     fig3.add_subplot(rows, columns, i)
     z = np.zeros((1, n_z)).astype(np.float32)
-    z[0, (i-1)/columns] = z_values[i%columns-1]
+    z[0, int((i-1)/columns)] = z_values[int(i%columns-1)]
     # print (z)
     img_recon_interp, gate_recon_interp = model.decode(z, mode=0)
     img_recon_interp = img_recon_interp.numpy()

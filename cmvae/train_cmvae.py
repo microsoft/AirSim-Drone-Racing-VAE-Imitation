@@ -16,13 +16,13 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
-output_dir = '/home/rb/data/model_outputs/cmvae_directZ_0'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+output_dir = '/home/rb/data/model_outputs/cmvae_test'
 batch_size = 32
 epochs = 10000
 n_z = 10
 img_res = 64
-max_size = 300000  # default is None
+max_size = None  # default is None
 learning_rate = 1e-4
 
 ###########################################
@@ -149,7 +149,7 @@ def test(img_gt, gate_gt, mode):
 ###########################################
 
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 # 0 = all messages are logged (default behavior)
 # 1 = INFO messages are not printed
 # 2 = INFO and WARNING messages are not printed

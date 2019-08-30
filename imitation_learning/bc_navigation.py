@@ -4,6 +4,7 @@ import numpy as np
 import vel_regressor
 import cv2
 import math
+import tensorflow as tf
 
 import os, sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +44,14 @@ def move_drone(client, vel_cmd):
 
 print(os.path.abspath(airsim.__file__))
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+
+# my_devices = tf.config.experimental.list_physical_devices(device_type='CPU')
+# tf.config.experimental.set_visible_devices(devices=my_devices, device_type='CPU')
+# tf.debugging.set_log_device_placement(True)
+
+
 if __name__ == "__main__":
     # set airsim client
     client = airsim.MultirotorClient()
@@ -72,7 +81,8 @@ if __name__ == "__main__":
     acc_max = 3.0
 
     time.sleep(1.0)
-    takeoff_position = airsim.Vector3r(25, 5, -2)
+    # takeoff_position = airsim.Vector3r(25, 5, -2)
+    takeoff_position = airsim.Vector3r(0, 0, -2)
     takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
     # takeoff_orientation = airsim.Vector3r(1, 0, 0)
