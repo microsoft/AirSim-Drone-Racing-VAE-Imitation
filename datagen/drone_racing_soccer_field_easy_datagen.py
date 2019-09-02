@@ -31,6 +31,7 @@ height_range = [0, -4]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
 perpendicular = True  # if 1, then move with velocity constraint
 vel_max = 5.0
+vel_avg = 3.0
 acc_max = 10.0
 
 ###########################################
@@ -47,6 +48,7 @@ class DroneRacingDataGenerator(object):
                 perpendicular,
                 odom_loop_rate_sec,
                 vel_max,
+                vel_avg,
                 acc_max):
 
         self.curr_track_gate_poses = None
@@ -72,6 +74,7 @@ class DroneRacingDataGenerator(object):
         self.perpendicular=perpendicular
 
         self.vel_max = vel_max
+        self.vel_avg = vel_avg
         self.acc_max = acc_max
 
         # todo encapsulate in function
@@ -207,7 +210,7 @@ class DroneRacingDataGenerator(object):
                                                              viz_traj=True,
                                                              vehicle_name=self.drone_name)
         else:
-            gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, self.direction, scale=vel_max/1.5)
+            gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, self.direction, scale=self.vel_avg)
             self.last_future = self.client.moveOnSplineVelConstraintsAsync([self.curr_track_gate_poses[self.next_gate_idx].position],
                                                                            [gate_vector],
                                                                            vel_max=self.vel_max, acc_max=self.acc_max,
@@ -305,6 +308,7 @@ if __name__ == "__main__":
                                                           perpendicular=perpendicular,
                                                           odom_loop_rate_sec=0.015,
                                                           vel_max=vel_max,
+                                                          vel_avg=vel_avg,
                                                           acc_max=acc_max
                                                           )
     drone_racing_datagenerator.start_training_data_generator()

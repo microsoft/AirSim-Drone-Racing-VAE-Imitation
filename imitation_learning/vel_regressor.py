@@ -22,7 +22,7 @@ import racing_utils
 
 
 class VelRegressor():
-    def __init__(self, regressor_type, bc_weights_path, cmvae_weights_path=None):
+    def __init__(self, regressor_type, bc_weights_path, feature_weights_path=None):
         self.regressor_type = regressor_type
 
         # create models
@@ -32,7 +32,12 @@ class VelRegressor():
         elif self.regressor_type == 'latent':
             # self.cmvae_model = racing_models.cmvae.Cmvae(n_z=20, gate_dim=4, res=64, trainable_model=False)
             self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
-            self.cmvae_model.load_weights(cmvae_weights_path)
+            self.cmvae_model.load_weights(feature_weights_path)
+            self.bc_model = racing_models.bc_latent.BcLatent()
+            self.bc_model.load_weights(bc_weights_path)
+        elif self.regressor_type == 'reg':
+            self.reg_model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
+            self.reg_model.load_weights(feature_weights_path)
             self.bc_model = racing_models.bc_latent.BcLatent()
             self.bc_model.load_weights(bc_weights_path)
 
@@ -42,6 +47,9 @@ class VelRegressor():
             predictions = self.bc_model(img)
         elif self.regressor_type == 'latent':
             z, _, _ = self.cmvae_model.encode(img)
+            predictions = self.bc_model(z)
+        elif self.regressor_type == 'reg':
+            z = self.reg_model(img)
             predictions = self.bc_model(z)
         predictions = predictions.numpy()
         predictions = racing_utils.dataset_utils.de_normalize_v(predictions)

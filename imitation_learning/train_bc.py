@@ -19,16 +19,17 @@ import racing_utils
 # data_dir = '/home/rb/data/il_datasets/bc_1'
 data_dir_list = ['/home/rb/data/il_datasets/bc_1',
                  '/home/rb/data/il_datasets/bc_2']
-output_dir = '/home/rb/data/model_outputs/bc_new_full_0'
-training_mode = 'full'  # 'full' or 'latent'
+output_dir = '/home/rb/data/model_outputs/bc_reg_latent_0'
+training_mode = 'reg'  # 'full' or 'latent' or 'reg'
 # cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
 cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
+reg_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_5.ckpt'
 n_z = 10
 batch_size = 32
 epochs = 10000
 img_res = 64
 max_size = None  # default is None
-learning_rate = 1e-3  # 1e-2 for latent, 1e-3 for full
+learning_rate = 1e-2  # 1e-2 for latent, 1e-3 for full
 
 ###########################################
 # CUSTOM FUNCTIONS
@@ -53,6 +54,9 @@ def train(images, labels, epoch, training_mode):
         elif training_mode == 'latent':
             z, _, _ = cmvae_model.encode(images)
             predictions = bc_model(z)
+        elif training_mode == 'reg':
+            z = reg_model(images)
+            predictions = bc_model(z)
         recon_loss = tf.reduce_mean(compute_loss(labels, predictions))
     gradients = tape.gradient(recon_loss, bc_model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, bc_model.trainable_variables))
@@ -65,6 +69,9 @@ def test(images, labels, training_mode):
         predictions = bc_model(images)
     elif training_mode == 'latent':
         z, _, _ = cmvae_model.encode(images)
+        predictions = bc_model(z)
+    elif training_mode == 'reg':
+        z = reg_model(images)
         predictions = bc_model(z)
     recon_loss = tf.reduce_mean(compute_loss(labels, predictions))
     test_loss_rec_v(recon_loss)
@@ -95,6 +102,11 @@ elif training_mode == 'latent':
     cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
     cmvae_model.load_weights(cmvae_weights_path)
     cmvae_model.trainable = False
+    bc_model = racing_models.bc_latent.BcLatent()
+elif training_mode == 'reg':
+    reg_model = model = racing_models.dronet.Dronet(num_outputs=4, include_top=True)
+    reg_model.load_weights(reg_weights_path)
+    reg_model.trainable = False
     bc_model = racing_models.bc_latent.BcLatent()
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 

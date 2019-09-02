@@ -177,7 +177,7 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
             # reached the last point -- exit loop of images
             break
 
-    print('Done. Going to read csv file.')
+    print('Going to read csv file.')
     # prepare gate R THETA PSI PHI as np array reading from a file
     raw_table = np.loadtxt(data_dir + '/gate_training_data.csv', delimiter=' ')
     raw_table = raw_table[:size_data, :]
@@ -203,6 +203,24 @@ def create_dataset_csv(data_dir, batch_size, res, max_size=None):
     ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
     ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
 
+    return ds_train, ds_test
+
+
+def create_unsup_dataset_multiple_sources(data_dir_list, batch_size, res):
+    # load all the images in one single large dataset
+    images_np = np.empty((0,res,res,3)).astype(np.float32)
+    for data_dir in data_dir_list:
+        img_array = read_images(data_dir, res, max_size=None)
+        images_np = np.concatenate((images_np, img_array), axis=0)
+    # make fake distances to gate as -1
+    num_items = images_np.shape[0]
+    print('Real_life dataset has {} images total'.format(num_items))
+    raw_table = (-1.0*np.ones((num_items, 4))).astype(np.float32)
+    # separate the actual dataset:
+    img_train, img_test, dist_train, dist_test = train_test_split(images_np, raw_table, test_size=0.1, random_state=42)
+    # convert to tf format dataset and prepare batches
+    ds_train = tf.data.Dataset.from_tensor_slices((img_train, dist_train)).batch(batch_size)
+    ds_test = tf.data.Dataset.from_tensor_slices((img_test, dist_test)).batch(batch_size)
     return ds_train, ds_test
 
 

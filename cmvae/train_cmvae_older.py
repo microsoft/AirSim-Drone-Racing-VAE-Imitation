@@ -17,17 +17,7 @@ import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
 data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
-include_real_data = True
-real_data_dir_list = ['/home/rb/data/real_life/video_0',
-                      '/home/rb/data/real_life/video_1',
-                      '/home/rb/data/real_life/video_2',
-                      '/home/rb/data/real_life/video_3',
-                      '/home/rb/data/real_life/video_4',
-                      '/home/rb/data/real_life/video_5',
-                      '/home/rb/data/real_life/video_6',
-                      '/home/rb/data/real_life/video_7',
-                      '/home/rb/data/real_life/video_8']
-output_dir = '/home/rb/data/model_outputs/cmvae_joint_0'
+output_dir = '/home/rb/data/model_outputs/cmvae_img_0'
 batch_size = 32
 epochs = 10000
 n_z = 10
@@ -52,11 +42,9 @@ def calc_weighted_loss_img(img_recon, images_np):
 
 def reset_metrics():
     train_loss_rec_img.reset_states()
-    train_loss_rec_img_real.reset_states()
     train_loss_rec_gate.reset_states()
     train_loss_kl.reset_states()
     test_loss_rec_img.reset_states()
-    test_loss_rec_img_real.reset_states()
     test_loss_rec_gate.reset_states()
     test_loss_kl.reset_states()
 
@@ -81,25 +69,19 @@ def regulate_weights(epoch):
         w_img = 1.0
     else:
         w_img = 1.0
-    # for w_img_real
-    if epoch < 100:
-        w_img_real = 1.0
-    else:
-        w_img_real = 1.0
     # for w_gate
     if epoch < 100:
         w_gate = 1.0
     else:
         w_gate = 1.0
-    return beta, w_img, w_img_real, w_gate
+    return beta, w_img, w_gate
 
 
 @tf.function
-def compute_loss_unsupervised(img_gt, img_real, gate_gt, img_recon, img_recon_real, gate_recon, means, stddev, mode):
+def compute_loss_unsupervised(img_gt, gate_gt, img_recon, gate_recon, means, stddev, mode):
     # copute reconstruction loss
     if mode == 0:
         img_loss = tf.losses.mean_squared_error(img_gt, img_recon)
-        img_loss_real = tf.losses.mean_squared_error(img_real, img_recon_real)
         # img_loss = tf.losses.mean_absolute_error(img_gt, img_recon)
         gate_loss = tf.losses.mean_squared_error(gate_gt, gate_recon)
         kl_loss = -0.5 * tf.reduce_mean(tf.reduce_sum((1 + stddev - tf.math.pow(means, 2) - tf.math.exp(stddev)), axis=1))
@@ -111,11 +93,11 @@ def compute_loss_unsupervised(img_gt, img_real, gate_gt, img_recon, img_recon_re
     # print('Labels: {}'.format(labels))
     # print('Lrec: {}'.format(recon_loss))
     # copute KL loss: D_KL(Q(z|X,y) || P(z|X))
-    return img_loss, img_loss_real, gate_loss, kl_loss
+    return img_loss, gate_loss, kl_loss
 
 
 @tf.function
-def train(img_gt, gate_gt, img_real, epoch, mode):
+def train(img_gt, gate_gt, epoch, mode):
     # freeze the non-utilized weights
     # if mode == 0:
     #     model.q_img.trainable = True
@@ -131,19 +113,17 @@ def train(img_gt, gate_gt, img_real, epoch, mode):
     #     model.p_gate.trainable = True
     with tf.GradientTape() as tape:
         img_recon, gate_recon, means, stddev, z = model(img_gt, mode)
-        img_recon_real, _, _, _, _ = model(img_real, mode)
-        img_loss, img_loss_real, gate_loss, kl_loss = compute_loss_unsupervised(img_gt, img_real, gate_gt, img_recon, img_recon_real, gate_recon, means, stddev, mode)
+        img_loss, gate_loss, kl_loss = compute_loss_unsupervised(img_gt, gate_gt, img_recon, gate_recon, means, stddev, mode)
         img_loss = tf.reduce_mean(img_loss)
-        img_loss_real = tf.reduce_mean(img_loss_real)
         gate_loss = tf.reduce_mean(gate_loss)
-        beta, w_img, w_img_real, w_gate = regulate_weights(epoch)
+        beta, w_img, w_gate = regulate_weights(epoch)
         # weighted_loss_img = calc_weighted_loss_img(img_recon, img_gt)
         if mode == 0:
-            total_loss = w_img*img_loss + w_img_real*img_loss_real + w_gate*gate_loss + beta*kl_loss
+            # total_loss = w_img*img_loss + w_gate*gate_loss + beta*kl_loss
+            total_loss = w_img * img_loss + beta * kl_loss
             # total_loss = weighted_loss_img + gate_loss + beta * kl_loss
             # total_loss = img_loss
             train_loss_rec_img.update_state(img_loss)
-            train_loss_rec_img_real.update_state(img_loss_real)
             train_loss_rec_gate.update_state(gate_loss)
             train_loss_kl.update_state(kl_loss)
         # TODO: later create structure for other training modes -- for now just training everything together
@@ -157,36 +137,15 @@ def train(img_gt, gate_gt, img_real, epoch, mode):
 
 
 @tf.function
-def test(img_gt, gate_gt, img_real, mode):
+def test(img_gt, gate_gt, mode):
     img_recon, gate_recon, means, stddev, z = model(img_gt, mode)
-    img_recon_real, _, _, _, _ = model(img_real, mode)
-    img_loss, img_loss_real, gate_loss, kl_loss = compute_loss_unsupervised(img_gt, img_real, gate_gt, img_recon, img_recon_real, gate_recon, means, stddev, mode)
+    img_loss, gate_loss, kl_loss = compute_loss_unsupervised(img_gt, gate_gt, img_recon, gate_recon, means, stddev, mode)
     img_loss = tf.reduce_mean(img_loss)
-    img_loss_real = tf.reduce_mean(img_loss_real)
     gate_loss = tf.reduce_mean(gate_loss)
     if mode == 0:
         test_loss_rec_img.update_state(img_loss)
-        test_loss_rec_img_real.update_state(img_loss_real)
         test_loss_rec_gate.update_state(gate_loss)
         test_loss_kl.update_state(kl_loss)
-
-
-def get_next_batch(iterator, ds_type):
-    try:
-        images, labels = next(iterator)
-    except:
-        if ds_type == 'train':
-            iterator = train_ds_real.__iter__()
-        elif ds_type == 'test':
-            iterator = test_ds_real.__iter__()
-        images, labels = next(iterator)
-    return images, iterator
-    # images, labels = next(iterator, None)
-    # if train_images is None:
-    #     iterator = train_ds_real.__iter__()
-    #     images, labels = next(iterator)
-    # return images, iterator
-
 
 ###########################################
 
@@ -203,7 +162,6 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 # load dataset
 print('Starting dataset')
 train_ds, test_ds = racing_utils.dataset_utils.create_dataset_csv(data_dir, batch_size, img_res, max_size=max_size)
-train_ds_real, test_ds_real = racing_utils.dataset_utils.create_unsup_dataset_multiple_sources(real_data_dir_list, batch_size, img_res)
 print('Done with dataset')
 
 # create model
@@ -213,11 +171,9 @@ optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics
 train_loss_rec_img = tf.keras.metrics.Mean(name='train_loss_rec_img')
-train_loss_rec_img_real = tf.keras.metrics.Mean(name='train_loss_rec_img_real')
 train_loss_rec_gate = tf.keras.metrics.Mean(name='train_loss_rec_gate')
 train_loss_kl = tf.keras.metrics.Mean(name='train_loss_kl')
 test_loss_rec_img = tf.keras.metrics.Mean(name='test_loss_rec_img')
-test_loss_rec_img_real = tf.keras.metrics.Mean(name='test_loss_rec_img_real')
 test_loss_rec_gate = tf.keras.metrics.Mean(name='test_loss_rec_gate')
 test_loss_kl = tf.keras.metrics.Mean(name='test_loss_kl')
 metrics_writer = tf.summary.create_file_writer(output_dir)
@@ -230,21 +186,15 @@ if not os.path.isdir(output_dir):
 print('Start training ...')
 mode = 0
 flag = True
-unsup_train_iterator = train_ds.__iter__()
-unsup_test_iterator = test_ds.__iter__()
-unsup_train_iterator_orig = train_ds.__iter__()
-unsup_test_iterator_orig = test_ds.__iter__()
 for epoch in range(epochs):
     # print('MODE NOW: {}'.format(mode))
     for train_images, train_labels in train_ds:
-        train_real_images, unsup_train_iterator = get_next_batch(unsup_train_iterator, 'train')
-        train(train_images, train_labels, train_real_images, epoch, mode)
+        train(train_images, train_labels, epoch, mode)
         if flag:
             model.summary()
             flag = False
     for test_images, test_labels in test_ds:
-        test_real_images, unsup_test_iterator = get_next_batch(unsup_test_iterator, 'test')
-        test(test_images, test_labels, test_real_images,  mode)
+        test(test_images, test_labels, mode)
     # save model
     if epoch % 5 == 0 and epoch > 0:
         print('Saving weights to {}'.format(output_dir))
@@ -253,18 +203,15 @@ for epoch in range(epochs):
     if mode == 0:
         with metrics_writer.as_default():
             tf.summary.scalar('train_loss_rec_img', train_loss_rec_img.result(), step=epoch)
-            tf.summary.scalar('train_loss_rec_img_real', train_loss_rec_img_real.result(), step=epoch)
             tf.summary.scalar('train_loss_rec_gate', train_loss_rec_gate.result(), step=epoch)
             tf.summary.scalar('train_loss_kl', train_loss_kl.result(), step=epoch)
             tf.summary.scalar('test_loss_rec_img', test_loss_rec_img.result(), step=epoch)
-            tf.summary.scalar('test_loss_rec_img_real', test_loss_rec_img_real.result(), step=epoch)
             tf.summary.scalar('test_loss_rec_gate', test_loss_rec_gate.result(), step=epoch)
             tf.summary.scalar('test_loss_kl', test_loss_kl.result(), step=epoch)
-        print('Epoch {} | TRAIN: L_img: {}, TRAIN: L_img_real: {}, L_gate: {}, L_kl: {}, L_tot: {} | '
-              'TEST: L_img: {}, L_img_real: {}, L_gate: {}, L_kl: {}, L_tot: {}'
-              .format(epoch, train_loss_rec_img.result(), train_loss_rec_img_real.result(), train_loss_rec_gate.result(), train_loss_kl.result(),
+        print('Epoch {} | TRAIN: L_img: {}, L_gate: {}, L_kl: {}, L_tot: {} | TEST: L_img: {}, L_gate: {}, L_kl: {}, L_tot: {}'
+              .format(epoch, train_loss_rec_img.result(), train_loss_rec_gate.result(), train_loss_kl.result(),
                       train_loss_rec_img.result()+train_loss_rec_gate.result()+train_loss_kl.result(),
-                      test_loss_rec_img.result(), test_loss_rec_img_real.result(), test_loss_rec_gate.result(), test_loss_kl.result(),
+                      test_loss_rec_img.result(), test_loss_rec_gate.result(), test_loss_kl.result(),
                       test_loss_rec_img.result() + test_loss_rec_gate.result() + test_loss_kl.result()
                       ))
         reset_metrics() # reset all the accumulators of metrics

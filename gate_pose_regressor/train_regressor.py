@@ -16,11 +16,12 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_10k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
 output_dir = '/home/rb/data/model_outputs/reg_0'
 batch_size = 64
 epochs = 10000
 img_res = 64
+# max_size = 300000  # default is None
 max_size = None  # default is None
 learning_rate = 1e-4
 
@@ -100,7 +101,7 @@ for epoch in range(epochs):
     for test_images, test_labels in test_ds:
         test(test_images, test_labels)
     # save model
-    if epoch % 10 == 0 and epoch > 0:
+    if epoch % 5 == 0 and epoch > 0:
         print('Saving weights to {}'.format(output_dir))
         model.save_weights(os.path.join(output_dir, "reg_model_{}.ckpt".format(epoch)))
 
