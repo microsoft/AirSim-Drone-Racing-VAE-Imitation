@@ -16,13 +16,13 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
 output_dir = '/home/rb/data/model_outputs/reg_0'
 batch_size = 64
 epochs = 10000
 img_res = 64
-# max_size = 300000  # default is None
-max_size = None  # default is None
+max_size = 300000  # default is None
+# max_size = None  # default is None
 learning_rate = 1e-4
 
 ###########################################

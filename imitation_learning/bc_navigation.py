@@ -81,8 +81,8 @@ if __name__ == "__main__":
     acc_max = 3.0
 
     time.sleep(1.0)
-    # takeoff_position = airsim.Vector3r(25, 5, -2)
-    takeoff_position = airsim.Vector3r(0, 0, -2)
+    takeoff_position = airsim.Vector3r(25, 5, -2)
+    # takeoff_position = airsim.Vector3r(0, 0, -2)
     takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
     # takeoff_orientation = airsim.Vector3r(1, 0, 0)
@@ -96,20 +96,22 @@ if __name__ == "__main__":
 
     # training_mode = 'latent'  # 'full' or 'latent'
     # training_mode = 'full'  # 'full' or 'latent' or 'reg'
-    training_mode = 'reg'  # 'full' or 'latent' or 'reg'
+    training_mode = 'latent'  # 'full' or 'latent' or 'reg'
 
     # bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_180.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_joint_latent_0/bc_model_200.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_directZ_latent_0/bc_model_540.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_reg_latent_0/bc_model_10.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_reg_latent_0/bc_model_70.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_img_latent_0/bc_model_100.ckpt'
 
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_75.ckpt'
+    feature_weights_path = '/home/rb/data/model_outputs/cmvae_img_0/cmvae_model_15.ckpt'
 
-    feature_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_10.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_15.ckpt'
 
     vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path, feature_weights_path=feature_weights_path)
 

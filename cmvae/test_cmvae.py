@@ -18,16 +18,16 @@ import racing_utils
 ###########################################
 
 # DEFINE TESTING META PARAMETERS
-# data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
 # data_dir = '/home/rb/data/real_life/video_0'
-data_dir = '/home/rb/data/real_life/hand_picked_0'
+# data_dir = '/home/rb/data/real_life/hand_picked_0'
 # weights_path = '/home/rb/data/model_outputs/cmvae_test/cmvae_model_85.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_1/cmvae_model_15.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
-weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_75.ckpt'
+weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_30.ckpt'
 n_z = 10
 img_res = 64
-read_table = False
+read_table = True
 
 num_imgs_display = 50
 columns = 10
