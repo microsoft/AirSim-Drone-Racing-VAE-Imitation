@@ -39,7 +39,7 @@ eps = np.pi/10.0  # 18 degrees
 UAV_PITCH_RANGE = [-eps, eps]  #[-np.pi/4, np.pi/4]
 UAV_ROLL_RANGE = [-eps, eps]  #[-np.pi/4, np.pi/4]
 
-R_RANGE = [0.1, 20]  # in meters
+R_RANGE = [0.1, 10]  # in meters
 CAM_FOV = 90.0*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
 
 

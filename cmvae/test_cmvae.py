@@ -18,11 +18,11 @@ import racing_utils
 ###########################################
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_small_50k'
 # data_dir = '/home/rb/data/real_life/video_0'
 # data_dir = '/home/rb/data/real_life/hand_picked_0'
 # weights_path = '/home/rb/data/model_outputs/cmvae_test/cmvae_model_85.ckpt'
-weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_1/cmvae_model_15.ckpt'
+weights_path = '/home/rb/data/model_outputs/cmvae_d_0/cmvae_model_35.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_30.ckpt'
 n_z = 10
@@ -55,6 +55,9 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 images_np, raw_table = racing_utils.dataset_utils.create_test_dataset_csv(data_dir, img_res, read_table=read_table)
 print('Done with dataset')
 
+images_np = images_np[:1000,:]
+raw_table = raw_table[:1000,:]
+
 # create model
 # model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
@@ -74,7 +77,7 @@ gate_recon = racing_utils.dataset_utils.de_normalize_gate(gate_recon)
 #     sys.exit()
 
 # get stats for gate reconstruction
-# racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
+racing_utils.stats_utils.calculate_gate_stats(gate_recon, raw_table)
 
 # show some reconstruction figures
 fig = plt.figure(figsize=(20, 20))

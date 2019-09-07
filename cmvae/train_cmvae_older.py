@@ -16,7 +16,7 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_small_50k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_small_300k'
 output_dir = '/home/rb/data/model_outputs/cmvae_d_0'
 batch_size = 32
 epochs = 10000
