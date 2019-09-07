@@ -2,10 +2,10 @@ import numpy as np
 import cv2
 import os
 
-input_video_path = '/home/rb/data/real_life/raw/IMG_3827.MOV'
-output_path = '/home/rb/data/real_life/video_8'
+input_video_path = '/home/rb/data/real_life/raw/IMG_3886.MOV'
+output_path = '/home/rb/data/real_life/video_10'
 img_res = 64
-vis = False
+vis = True
 
 # create directory for the images
 path_images = os.path.join(output_path, 'images')
@@ -30,7 +30,7 @@ while (idx < idx_max):
     # rotate to correct vertical alignment
     rows, cols, num_channels = img.shape
     M = cv2.getRotationMatrix2D((cols / 2, rows / 2), -90, 1)
-    img = cv2.warpAffine(img, M, (cols, rows))
+    # img = cv2.warpAffine(img, M, (cols, rows))
 
     # crop square frame of interest 1080x1080
     img = img[0:1080, 420:1500]

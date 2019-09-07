@@ -16,7 +16,7 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_small_50k'
 include_real_data = True
 real_data_dir_list = ['/home/rb/data/real_life/video_0',
                       '/home/rb/data/real_life/video_1',
@@ -27,7 +27,7 @@ real_data_dir_list = ['/home/rb/data/real_life/video_0',
                       '/home/rb/data/real_life/video_6',
                       '/home/rb/data/real_life/video_7',
                       '/home/rb/data/real_life/video_8']
-output_dir = '/home/rb/data/model_outputs/cmvae_joint_0'
+output_dir = '/home/rb/data/model_outputs/cmvae_d_0'
 batch_size = 32
 epochs = 10000
 n_z = 10

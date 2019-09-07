@@ -16,13 +16,13 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_300k'
-output_dir = '/home/rb/data/model_outputs/cmvae_img_0'
+data_dir = '/home/rb/data/airsim_datasets/soccer_small_50k'
+output_dir = '/home/rb/data/model_outputs/cmvae_d_0'
 batch_size = 32
 epochs = 10000
 n_z = 10
 img_res = 64
-max_size = 300000  # default is None
+max_size = None  # default is None
 learning_rate = 1e-4
 
 ###########################################
@@ -119,8 +119,8 @@ def train(img_gt, gate_gt, epoch, mode):
         beta, w_img, w_gate = regulate_weights(epoch)
         # weighted_loss_img = calc_weighted_loss_img(img_recon, img_gt)
         if mode == 0:
-            # total_loss = w_img*img_loss + w_gate*gate_loss + beta*kl_loss
-            total_loss = w_img * img_loss + beta * kl_loss
+            total_loss = w_img*img_loss + w_gate*gate_loss + beta*kl_loss
+            # total_loss = w_img * img_loss + beta * kl_loss
             # total_loss = weighted_loss_img + gate_loss + beta * kl_loss
             # total_loss = img_loss
             train_loss_rec_img.update_state(img_loss)

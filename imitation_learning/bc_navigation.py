@@ -35,7 +35,7 @@ def process_image(client, img_res):
 def move_drone(client, vel_cmd):
     # good multipliers originally: 0.4 for vel, 0.8 for yaw
     # good multipliers new policies: 0.8 for vel, 0.8 for yaw
-    vel_cmd[0:2] = vel_cmd[0:2] * 0.5
+    vel_cmd[0:2] = vel_cmd[0:2] *1.0  # usually base speed is 3/ms
     vel_cmd[3] = vel_cmd[3] * 1.0
     # yaw rate is given in deg/s!! not rad/s
     yaw_mode = airsim.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
@@ -44,7 +44,7 @@ def move_drone(client, vel_cmd):
 
 print(os.path.abspath(airsim.__file__))
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 # my_devices = tf.config.experimental.list_physical_devices(device_type='CPU')
@@ -74,16 +74,24 @@ if __name__ == "__main__":
 
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=14, radius=25, radius_noise=3.0, height_range=[0, -3])
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=10, radius_noise=2.0, height_range=[0, -2])
 
     # wait till takeoff complete
     vel_max = 3.0
     acc_max = 3.0
 
     time.sleep(1.0)
-    takeoff_position = airsim.Vector3r(25, 5, -2)
+
+    # takeoff_position = airsim.Vector3r(25, 7, -1.5)
+    # takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
+    #
+    # takeoff_position = airsim.Vector3r(25, -7, -1.5)
+    # takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
+
+    takeoff_position = airsim.Vector3r(9, -7, -1.5)
+    takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
+
     # takeoff_position = airsim.Vector3r(0, 0, -2)
-    takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
     # takeoff_orientation = airsim.Vector3r(1, 0, 0)
     # client.plot_tf([takeoff_pose], duration=20.0, vehicle_name=drone_name)
@@ -94,22 +102,26 @@ if __name__ == "__main__":
     time.sleep(1.0)
     img_res = 64
 
-    # training_mode = 'latent'  # 'full' or 'latent'
+    training_mode = 'latent'  # 'full' or 'latent'
     # training_mode = 'full'  # 'full' or 'latent' or 'reg'
-    training_mode = 'latent'  # 'full' or 'latent' or 'reg'
+    # training_mode = 'reg'  # 'full' or 'latent' or 'reg'
+
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_180.ckpt'
 
     # bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_180.ckpt'
     # bc_weights_path = '/home/rb/data/model_outputs/bc_joint_latent_0/bc_model_200.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_directZ_latent_0/bc_model_540.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_reg_latent_0/bc_model_70.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_img_latent_0/bc_model_100.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_directZ_latent_0/bc_model_120.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_smallZ_latent_0/bc_model_120.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_reg_latent_0/bc_model_70.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_img_latent_0/bc_model_100.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_test_0/bc_model_130.ckpt'
 
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
+    feature_weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_0/cmvae_model_15.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_75.ckpt'
-    feature_weights_path = '/home/rb/data/model_outputs/cmvae_img_0/cmvae_model_15.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_img_0/cmvae_model_15.ckpt'
 
     # feature_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_15.ckpt'
 

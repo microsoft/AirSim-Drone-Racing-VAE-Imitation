@@ -4,7 +4,7 @@ import cv2
 import time
 
 # open data
-data_path = '/home/rb/data/il_datasets/bc_0'
+data_path = '/home/rb/data/il_datasets/bc_v5_n0'
 vel_table = np.loadtxt(data_path + '/proc_vel.txt', delimiter=',').astype(np.float32)
 with open(data_path + '/proc_images.txt') as f:
     img_table = f.read().splitlines()
@@ -14,7 +14,7 @@ if vel_table.shape[0] != len(img_table):
     raise Exception('Number of images ({}) different than number of entries in table ({}): '.format(len(img_table), vel_table.shape[0]))
 
 idx_list = range(vel_table.shape[0])
-idx_range = [5000,10000]
+idx_range = [0,4000]
 plt.plot(idx_list[idx_range[0]:idx_range[1]], vel_table[idx_range[0]:idx_range[1], 0], color='red')
 plt.plot(idx_list[idx_range[0]:idx_range[1]], vel_table[idx_range[0]:idx_range[1], 1], color='green')
 plt.plot(idx_list[idx_range[0]:idx_range[1]], vel_table[idx_range[0]:idx_range[1], 2], color='blue')
@@ -36,4 +36,5 @@ for img_idx in range(10000):
     cv2.arrowedLine(img, origin, pt_vy, (0, 255, 0), 3)
     cv2.imshow('image', img)
     # time.sleep(0.5)
+    print(vel_table[img_idx,:])
     cv2.waitKey(20)

@@ -46,7 +46,8 @@ def RedGateSpawner(client, num_gates, noise_amp):
 def RedGateSpawnerCircle(client, num_gates, radius, radius_noise, height_range):
     track = generate_gate_poses(num_gates=num_gates, race_course_radius=radius, radius_noise=radius_noise, height_range=height_range, direction=0)
     for idx in range(num_gates):
-        client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
+        # client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
+        client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 0.06944444444)
         time.sleep(0.05)
 
 
