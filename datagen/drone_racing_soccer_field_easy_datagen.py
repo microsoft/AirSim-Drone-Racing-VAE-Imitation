@@ -19,20 +19,20 @@ models_path = os.path.join(curr_dir, '..', 'racing_utils')
 sys.path.insert(0, models_path)
 import racing_utils
 
-random.seed(999)
+# random.seed(999)
 
 ###########################################
 
 # DEFINE DATA GENERATION META PARAMETERS
 num_gates_desired = 8
-race_course_radius = 7
-radius_noise = 3
-height_range = [0, -3]
+race_course_radius = 8
+radius_noise = 0
+height_range = [0, -0]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
 perpendicular = False  # if 1, then move with velocity constraint
-vel_max = 5.5
+vel_max = 5.0
 vel_avg = 5.0
-acc_max = 5.0
+acc_max = 2.0
 
 # DEFINE DATA GENERATION META PARAMETERS
 # num_gates = 14
@@ -159,7 +159,13 @@ class DroneRacingDataGenerator(object):
         #     print(gate_pose.position.x_val, gate_pose.position.y_val,gate_pose.position.z_val)
 
     def takeoff_with_moveOnSpline(self, takeoff_height, vel_max, acc_max):
-        self.client.moveOnSplineAsync(path=[airsim.Vector3r(8, -3, takeoff_height)],
+
+        # takeoff_position = airsim.Vector3r(9, -7, -1.5)
+        # takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
+        # self.client.moveOnSplineVelConstraintsAsync([takeoff_position], [takeoff_orientation], vel_max=vel_max,
+        #                                        acc_max=acc_max, vehicle_name='drone_0', viz_traj=True).join()
+        # time.sleep(10.0)
+        self.client.moveOnSplineAsync(path=[airsim.Vector3r(8, -2, takeoff_height)],
                                       vel_max=vel_max, acc_max=acc_max,
                                       add_curr_odom_position_constraint=True,
                                       add_curr_odom_velocity_constraint=True,
@@ -235,7 +241,7 @@ class DroneRacingDataGenerator(object):
                                                                            vel_max=self.vel_max, acc_max=self.acc_max,
                                                                            add_curr_odom_position_constraint=True,
                                                                            add_curr_odom_velocity_constraint=True,
-                                                                           viz_traj=False,
+                                                                           viz_traj=True,
                                                                            vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
@@ -315,14 +321,14 @@ class DroneRacingDataGenerator(object):
         time.sleep(0.01)
         self.client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains().to_list(), vehicle_name=self.drone_name)
         time.sleep(0.01)
-        self.takeoff_with_moveOnSpline(takeoff_height=-2, vel_max=self.vel_max, acc_max=self.acc_max)
+        self.takeoff_with_moveOnSpline(takeoff_height=-1, vel_max=self.vel_max, acc_max=self.acc_max)
         self.set_num_training_laps(num_training_laps)
         self.start_expert_planner_controller_thread()
 
 
 if __name__ == "__main__":
     drone_racing_datagenerator = DroneRacingDataGenerator(drone_name='drone_0',
-                                                          gate_passed_thresh=1.0,
+                                                          gate_passed_thresh=0.5,
                                                           race_course_radius=race_course_radius,
                                                           radius_noise=radius_noise,
                                                           height_range=height_range,

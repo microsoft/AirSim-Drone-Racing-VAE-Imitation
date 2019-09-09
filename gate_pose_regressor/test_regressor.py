@@ -24,8 +24,8 @@ import racing_utils
 ###########################################
 
 # DEFINE TESTING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_new_1k'
-weights_path = '/home/rb/data/model_outputs/reg_7/reg_model_30.ckpt'
+data_dir = '/home/rb/data/airsim_datasets/soccer_close_1k'
+weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
 img_res = 64
 read_table = True
 

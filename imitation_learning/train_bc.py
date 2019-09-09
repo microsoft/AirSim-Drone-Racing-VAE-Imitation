@@ -23,20 +23,22 @@ data_dir_list = ['/home/rb/data/il_datasets/bc_v5_n0',
                  '/home/rb/data/il_datasets/bc_v5_n1',
                  '/home/rb/data/il_datasets/bc_v5_n2',
                  '/home/rb/data/il_datasets/bc_v5_n3']
-output_dir = '/home/rb/data/model_outputs/bc_test_2'
-training_mode = 'full'  # 'full' or 'latent' or 'reg'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_30.ckpt'
-cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_0/cmvae_model_15.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_img_0/cmvae_model_15.ckpt'
-reg_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_20.ckpt'
+output_dir = '/home/rb/data/model_outputs/bc_con'
+
+training_mode = 'latent'  # 'full' or 'latent' or 'reg'
+
+# reg_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
+cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'
+
 n_z = 10
 batch_size = 32
 epochs = 10000
 img_res = 64
 max_size = None  # default is None
-learning_rate = 1e-3  # 1e-2 for latent, 1e-3 for full
+learning_rate = 1e-2  # 1e-2 for latent, 1e-3 for full
 
 ###########################################
 # CUSTOM FUNCTIONS

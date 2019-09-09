@@ -1,6 +1,7 @@
 import tensorflow as tf
 import os
 import sys
+import glob
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 
 # import model
@@ -16,23 +17,18 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_small_50k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_small_300k'
 include_real_data = True
-real_data_dir_list = ['/home/rb/data/real_life/video_0',
-                      '/home/rb/data/real_life/video_1',
-                      '/home/rb/data/real_life/video_2',
-                      '/home/rb/data/real_life/video_3',
-                      '/home/rb/data/real_life/video_4',
-                      '/home/rb/data/real_life/video_5',
-                      '/home/rb/data/real_life/video_6',
-                      '/home/rb/data/real_life/video_7',
-                      '/home/rb/data/real_life/video_8']
-output_dir = '/home/rb/data/model_outputs/cmvae_d_0'
+real_data_path = '/home/rb/data/real_life'
+files_iphone = glob.glob(os.path.join(real_data_path, 'video_*'))
+files_bags = glob.glob(os.path.join(real_data_path, 'bag_*'))
+real_data_dir_list = files_iphone + files_bags
+output_dir = '/home/rb/data/model_outputs/cmvae_real'
 batch_size = 32
 epochs = 10000
 n_z = 10
 img_res = 64
-max_size = 300000  # default is None
+max_size = None  # default is None
 learning_rate = 1e-4
 
 ###########################################

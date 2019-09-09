@@ -74,11 +74,12 @@ if __name__ == "__main__":
 
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=10, radius_noise=2.0, height_range=[0, -2])
+    offset = [0, 0, -0]
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=3.0, height_range=[0, -3], track_offset=offset)
 
     # wait till takeoff complete
-    vel_max = 3.0
-    acc_max = 3.0
+    vel_max = 5.0
+    acc_max = 2.0
 
     time.sleep(1.0)
 
@@ -88,8 +89,8 @@ if __name__ == "__main__":
     # takeoff_position = airsim.Vector3r(25, -7, -1.5)
     # takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
 
-    takeoff_position = airsim.Vector3r(9, -7, -1.5)
-    takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
+    takeoff_position = airsim.Vector3r(5.5, -4, -1.5+offset[2])
+    takeoff_orientation = airsim.Vector3r(0.3, 0.9, 0)
 
     # takeoff_position = airsim.Vector3r(0, 0, -2)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
@@ -106,24 +107,23 @@ if __name__ == "__main__":
     # training_mode = 'full'  # 'full' or 'latent' or 'reg'
     # training_mode = 'reg'  # 'full' or 'latent' or 'reg'
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_new_full_0/bc_model_180.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_full/bc_model_100.ckpt'
+    # feature_weights_path = ''
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_full_0/bc_model_270.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_latent_2/bc_model_270.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_joint_latent_0/bc_model_200.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_directZ_latent_0/bc_model_120.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_smallZ_latent_0/bc_model_120.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_reg_latent_0/bc_model_70.ckpt'
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_img_latent_0/bc_model_100.ckpt'
-    bc_weights_path = '/home/rb/data/model_outputs/bc_test_0/bc_model_130.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_reg/bc_model_80.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
 
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_9/cmvae_model_20.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_directZ_0/cmvae_model_20.ckpt'
-    feature_weights_path = '/home/rb/data/model_outputs/cmvae_smallZ_0/cmvae_model_15.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_joint_0/cmvae_model_75.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_img_0/cmvae_model_15.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
 
-    # feature_weights_path = '/home/rb/data/model_outputs/reg_0/reg_model_15.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_150.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+
+    bc_weights_path = '/home/rb/data/model_outputs/bc_img/bc_model_100.ckpt'
+    feature_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
+
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_real/bc_model_100.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'
 
     vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path, feature_weights_path=feature_weights_path)
 
