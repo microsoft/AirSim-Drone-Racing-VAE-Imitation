@@ -1,8 +1,8 @@
 import time
 from PoseSampler import *
 
-num_samples = 300000
-dataset_path = '/home/rb/data/airsim_datasets/soccer_close_300k'
+num_samples = 50000
+dataset_path = '/home/rb/data/airsim_datasets/soccer_cal_50k_new'
 pose_sampler = PoseSampler(num_samples, dataset_path)
 
 # pose_sampler.update_debug()

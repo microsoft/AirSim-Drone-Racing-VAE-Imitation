@@ -36,7 +36,7 @@ def move_drone(client, vel_cmd):
     # good multipliers originally: 0.4 for vel, 0.8 for yaw
     # good multipliers new policies: 0.8 for vel, 0.8 for yaw
     vel_cmd[0:2] = vel_cmd[0:2] *1.0  # usually base speed is 3/ms
-    vel_cmd[3] = vel_cmd[3] * 1.0
+    vel_cmd[3] = vel_cmd[3] * 1.1
     # yaw rate is given in deg/s!! not rad/s
     yaw_mode = airsim.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
     client.moveByVelocityAsync(vel_cmd[0], vel_cmd[1], vel_cmd[2], duration=0.1, yaw_mode=yaw_mode)
@@ -75,7 +75,8 @@ if __name__ == "__main__":
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
     offset = [0, 0, -0]
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=3.0, height_range=[0, -3], track_offset=offset)
+    noise = 2.0
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=noise, height_range=[0, -noise], track_offset=offset)
 
     # wait till takeoff complete
     vel_max = 5.0
@@ -90,7 +91,7 @@ if __name__ == "__main__":
     # takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
 
     takeoff_position = airsim.Vector3r(5.5, -4, -1.5+offset[2])
-    takeoff_orientation = airsim.Vector3r(0.3, 0.9, 0)
+    takeoff_orientation = airsim.Vector3r(0.4, 0.9, 0)
 
     # takeoff_position = airsim.Vector3r(0, 0, -2)
     # takeoff_position = airsim.Vector3r(0, 0, 10)
@@ -113,14 +114,14 @@ if __name__ == "__main__":
     # bc_weights_path = '/home/rb/data/model_outputs/bc_reg/bc_model_80.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
+    feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_150.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_120.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
 
-    bc_weights_path = '/home/rb/data/model_outputs/bc_img/bc_model_100.ckpt'
-    feature_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_img/bc_model_100.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
 
     # bc_weights_path = '/home/rb/data/model_outputs/bc_real/bc_model_100.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'

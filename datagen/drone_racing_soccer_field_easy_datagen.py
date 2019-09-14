@@ -25,13 +25,13 @@ import racing_utils
 
 # DEFINE DATA GENERATION META PARAMETERS
 num_gates_desired = 8
-race_course_radius = 8
+race_course_radius = 6
 radius_noise = 0
 height_range = [0, -0]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
 perpendicular = False  # if 1, then move with velocity constraint
-vel_max = 5.0
-vel_avg = 5.0
+vel_max = 0.5
+vel_avg = 0.5
 acc_max = 2.0
 
 # DEFINE DATA GENERATION META PARAMETERS

@@ -16,8 +16,10 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_cal_300k_new'
-output_dir = '/home/rb/data/model_outputs/cmvae_con_cal_new'
+data_dir = '/home/rb/data/airsim_datasets/soccer_cal_50k'
+# weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+weights_path = '/home/rb/data/model_outputs/cmvae_con_cal/cmvae_model_20.ckpt'
+output_dir = '/home/rb/data/model_outputs/cmvae_con_cal_fine'
 batch_size = 32
 epochs = 10000
 n_z = 10
@@ -119,8 +121,8 @@ def train(img_gt, gate_gt, epoch, mode):
         beta, w_img, w_gate = regulate_weights(epoch)
         # weighted_loss_img = calc_weighted_loss_img(img_recon, img_gt)
         if mode == 0:
-            total_loss = w_img*img_loss + w_gate*gate_loss + beta*kl_loss
-            # total_loss = w_img * img_loss + beta * kl_loss
+            # total_loss = w_img*img_loss + w_gate*gate_loss + beta*kl_loss
+            total_loss = w_img * img_loss + beta * kl_loss
             # total_loss = weighted_loss_img + gate_loss + beta * kl_loss
             # total_loss = img_loss
             train_loss_rec_img.update_state(img_loss)
@@ -167,6 +169,8 @@ print('Done with dataset')
 # create model
 # model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+model.load_weights(weights_path)
+model.trainable = True
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics

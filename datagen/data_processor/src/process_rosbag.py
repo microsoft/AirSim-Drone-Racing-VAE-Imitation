@@ -7,7 +7,7 @@ import cv2
 
 # files_list = ['/home/rb/data/log/most_2019-09-02-16-37-41.bag']
 print('Going to read file list')
-data_dir = '/home/rb/data/log'
+data_dir = '/home/rb/data/log_2'
 files_list = glob.glob(os.path.join(data_dir, '*.bag'))
 path_save_images = '/home/rb/data/real_life'
 

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 
 import os
 import sys
@@ -39,8 +40,11 @@ eps = np.pi/10.0  # 18 degrees
 UAV_PITCH_RANGE = [-eps, eps]  #[-np.pi/4, np.pi/4]
 UAV_ROLL_RANGE = [-eps, eps]  #[-np.pi/4, np.pi/4]
 
-R_RANGE = [0.1, 10]  # in meters
-CAM_FOV = 90.0*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
+R_RANGE = [3, 12]  # in meters
+correction_theta = 0.7
+correction_phi = 0.7
+CAM_FOV = 42.5 * correction_theta
+# CAM_FOV = 90.0*0.85  # in degrees -- needs to be a bit smaller than 90 in fact because of cone vs. square
 
 
 class PoseSampler:
@@ -77,11 +81,12 @@ class PoseSampler:
         p_o_b, phi_base = racing_utils.geom_utils.randomQuadPose(UAV_X_RANGE, UAV_Y_RANGE, UAV_Z_RANGE, UAV_YAW_RANGE, UAV_PITCH_RANGE, UAV_ROLL_RANGE)
         self.client.simSetVehiclePose(p_o_b, True)
         # create and set gate pose relative to the quad
-        p_o_g, r, theta, psi, phi_rel = racing_utils.geom_utils.randomGatePose(p_o_b, phi_base, R_RANGE, CAM_FOV)
+        p_o_g, r, theta, psi, phi_rel = racing_utils.geom_utils.randomGatePose(p_o_b, phi_base, R_RANGE, CAM_FOV, correction_phi)
         # p_o_g_new = racing_utils.geom_utils.debugRelativeOrientation(p_o_b, p_o_g, -np.pi/1.0)
         # self.client.simSetObjectPose(self.tgt_name, p_o_g_new, True)
         if self.with_gate:
             self.client.simSetObjectPose(self.tgt_name, p_o_g, True)
+            # time.sleep(0.05)
             # self.client.plot_tf([p_o_g], duration=20.0)
         # request quad img from AirSim
         image_response = self.client.simGetImages([airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]

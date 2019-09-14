@@ -17,13 +17,16 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-data_dir = '/home/rb/data/airsim_datasets/soccer_small_300k'
+data_dir = '/home/rb/data/airsim_datasets/soccer_cal_300k_new'
+weights_path = '/home/rb/data/model_outputs/cmvae_real_test_1/cmvae_model_5.ckpt'
+# weights_path = None
 include_real_data = True
 real_data_path = '/home/rb/data/real_life'
-files_iphone = glob.glob(os.path.join(real_data_path, 'video_*'))
+# files_iphone = glob.glob(os.path.join(real_data_path, 'video_*'))
 files_bags = glob.glob(os.path.join(real_data_path, 'bag_*'))
-real_data_dir_list = files_iphone + files_bags
-output_dir = '/home/rb/data/model_outputs/cmvae_real'
+# real_data_dir_list = files_iphone + files_bags
+real_data_dir_list = files_bags
+output_dir = '/home/rb/data/model_outputs/cmvae_real_test_2'
 batch_size = 32
 epochs = 10000
 n_z = 10
@@ -79,9 +82,9 @@ def regulate_weights(epoch):
         w_img = 1.0
     # for w_img_real
     if epoch < 100:
-        w_img_real = 1.0
+        w_img_real = 0.001
     else:
-        w_img_real = 1.0
+        w_img_real = 0.001
     # for w_gate
     if epoch < 100:
         w_gate = 1.0
@@ -205,6 +208,9 @@ print('Done with dataset')
 # create model
 # model = racing_models.cmvae.Cmvae(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
 model = racing_models.cmvae.CmvaeDirect(n_z=n_z, gate_dim=4, res=img_res, trainable_model=True)
+if weights_path is not None:
+    model.load_weights(weights_path)
+    model.trainable = True
 optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 
 # define metrics
@@ -242,7 +248,7 @@ for epoch in range(epochs):
         test_real_images, unsup_test_iterator = get_next_batch(unsup_test_iterator, 'test')
         test(test_images, test_labels, test_real_images,  mode)
     # save model
-    if epoch % 5 == 0 and epoch > 0:
+    if epoch % 1 == 0 and epoch > 0:
         print('Saving weights to {}'.format(output_dir))
         model.save_weights(os.path.join(output_dir, "cmvae_model_{}.ckpt".format(epoch)))
 

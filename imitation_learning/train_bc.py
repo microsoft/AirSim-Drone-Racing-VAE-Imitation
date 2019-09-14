@@ -19,17 +19,18 @@ import racing_utils
 # data_dir = '/home/rb/data/il_datasets/bc_1'
 # data_dir_list = ['/home/rb/data/il_datasets/bc_1',
 #                  '/home/rb/data/il_datasets/bc_2']
-data_dir_list = ['/home/rb/data/il_datasets/bc_v5_n0',
-                 '/home/rb/data/il_datasets/bc_v5_n1',
-                 '/home/rb/data/il_datasets/bc_v5_n2',
-                 '/home/rb/data/il_datasets/bc_v5_n3']
-output_dir = '/home/rb/data/model_outputs/bc_con'
+data_dir_list = ['/home/rb/data/il_datasets/bc_v05_n0',
+                 '/home/rb/data/il_datasets/bc_v05_n1',
+                 '/home/rb/data/il_datasets/bc_v05_n2',
+                 '/home/rb/data/il_datasets/bc_v05_n3']
+output_dir = '/home/rb/data/model_outputs/bc_real_cal_new_2_slow'
 
 training_mode = 'latent'  # 'full' or 'latent' or 'reg'
 
 # reg_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
 # cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
-cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new_2/cmvae_model_1.ckpt'
 # cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
 # cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'
 

@@ -30,8 +30,8 @@ class VelRegressor():
             self.bc_model = racing_models.bc_full.BcFull()
             self.bc_model.load_weights(bc_weights_path)
         elif self.regressor_type == 'latent':
-            # self.cmvae_model = racing_models.cmvae.Cmvae(n_z=10, gate_dim=4, res=64, trainable_model=False)
-            self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
+            self.cmvae_model = racing_models.cmvae.Cmvae(n_z=10, gate_dim=4, res=64, trainable_model=False)
+            # self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
             self.cmvae_model.load_weights(feature_weights_path)
             self.bc_model = racing_models.bc_latent.BcLatent()
             self.bc_model.load_weights(bc_weights_path)

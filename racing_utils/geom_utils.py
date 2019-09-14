@@ -40,7 +40,7 @@ def randomSample(value_range):
     return (value_range[1] - value_range[0])*np.random.random() + value_range[0]
 
 
-def randomGatePose(p_o_b, phi_base, r_range, cam_fov):
+def randomGatePose(p_o_b, phi_base, r_range, cam_fov, correction):
     gate_ok = False
     while not gate_ok:
         # create translation of gate
@@ -50,8 +50,9 @@ def randomGatePose(p_o_b, phi_base, r_range, cam_fov):
         theta = randomSample(theta_range)
         # need to make projection on geodesic curve! not equal FOV in theta and psi
         alpha_prime = np.arctan(np.cos(np.abs(theta)))
-        psi_range = [np.pi / 2 - alpha_prime, np.pi / 2 + alpha_prime]
-        psi = randomSample(psi_range)
+        psi_range = [-alpha_prime, alpha_prime]
+        psi_range = [x * correction for x in psi_range]
+        psi = randomSample(psi_range) + np.pi/2.0
         # get relative vector in the base frame coordinates
         t_b_g_body = polarTranslation(r, theta, psi)
 
