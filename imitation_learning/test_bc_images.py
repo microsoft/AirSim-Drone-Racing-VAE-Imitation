@@ -19,11 +19,19 @@ import racing_utils
 
 # DEFINE TRAINING META PARAMETERS
 save_video = True
-video_file = '/home/rb/Videos/real_life/bc_con_slow_video_7.avi'
-data_dir = '/home/rb/data/real_life/video_7'
+video_file = '/home/rb/Videos/real_life/video_bag_17.avi'
+data_dir = '/home/rb/data/real_life/real_life_run/bag_17'
+
+# data_dir = '/home/rb/data/real_life/video_7'
+
 training_mode = 'latent'  # 'full' or 'latent'
-bc_weights_path = '/home/rb/data/model_outputs/bc_con_slow/bc_model_80.ckpt'
-cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+
+# bc_weights_path = '/home/rb/data/model_outputs/bc_con_slow/bc_model_80.ckpt'
+# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+
+bc_weights_path = '/home/rb/data/model_outputs/bc_real_cal_new_2_slow/bc_model_120.ckpt'
+cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new_2/cmvae_model_3.ckpt'
+
 n_z = 10
 img_res = 64
 img_display_res = 400
@@ -56,10 +64,20 @@ elif training_mode == 'latent':
     cmvae_model.load_weights(cmvae_weights_path)
     bc_model = racing_models.bc_latent.BcLatent()
     bc_model.load_weights(bc_weights_path)
-    z, _, _ = cmvae_model.encode(images_np)
-    predictions = bc_model(z)
+    batch_size = 1000
+    num_batches = images_np.shape[0]/1000
+    predictions = np.zeros((batch_size*num_batches, 4)).astype(np.float32)
+    for batch_idx in range(num_batches-1):
+        print('Drone with batch {} out of {}'.format(batch_idx, num_batches))
+        z, _, _ = cmvae_model.encode(images_np[batch_idx*batch_size:(batch_idx+1)*batch_size, :])
+        predictions[batch_idx*batch_size:(batch_idx+1)*batch_size, :] = bc_model(z)
+    # for img_idx in range(images_np.shape[0]):
+    #     if img_idx % 1000 == 0:
+    #         print('Drone with {} images out of {}'.format(img_idx, images_np.shape[0]))
+    #     z, _, _ = cmvae_model.encode(np.array([images_np[img_idx, :]]))
+    #     predictions[img_idx, :] = bc_model(z)
 
-predictions = predictions.numpy()
+# predictions = predictions.numpy()
 
 # de-normalization of velocities
 predictions = racing_utils.dataset_utils.de_normalize_v(predictions)
@@ -69,9 +87,11 @@ if save_video:
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(video_file, fourcc, 20.0, (img_display_res, img_display_res))
 images_np = ((images_np+1.0)/2.0*255.0).astype(np.uint8)
-vel_scale = 20
+vel_scale = 1000
 yaw_scale = 40
 for img_idx in range(predictions.shape[0]):
+    if img_idx % 1000 == 0:
+        print('Drone with {} images out of {}'.format(img_idx, predictions.shape[0]))
     img = images_np[img_idx,:]
     img = cv2.resize(img, (img_display_res, img_display_res))
     o_x = int(img.shape[0]/2)
@@ -81,11 +101,11 @@ for img_idx in range(predictions.shape[0]):
     pt_vy = (o_x + int(vel_scale * predictions[img_idx, 1]), o_y)
     cv2.arrowedLine(img, origin, pt_vx, (210, 0, 255), 3)
     cv2.arrowedLine(img, origin, pt_vy, (0, 255, 0), 3)
-    cv2.imshow('image', img)
+    # cv2.imshow('image', img)
     if save_video:
         out.write(img)
     # time.sleep(0.5)
-    cv2.waitKey(20)
+    # cv2.waitKey(20)
 
 if save_video:
     out.release()

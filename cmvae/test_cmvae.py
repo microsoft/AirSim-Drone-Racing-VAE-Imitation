@@ -19,23 +19,26 @@ import racing_utils
 
 # DEFINE TESTING META PARAMETERS
 # data_dir = '/home/rb/data/airsim_datasets/soccer_close_1k_mod'
+data_dir = '/home/rb/data/airsim_datasets/soccer_close_1k'
 # data_dir = '/home/rb/data/airsim_datasets/soccer_cal_1k'
 # data_dir = '/home/rb/data/airsim_datasets/soccer_cal_1k_new'
 # data_dir = '/home/rb/data/real_life/video_0'
 # data_dir = '/home/rb/data/real_life/hand_picked_2'
-data_dir = '/home/rb/data/real_life/hand_picked_3'
+# data_dir = '/home/rb/data/real_life/hand_picked_3'
 # data_dir = '/home/rb/data/real_life/hand_picked_1'
 
 read_table = False
 # read_table = True
 
 # weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
-# weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_40.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_real_fine/cmvae_model_10.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_img_fine/cmvae_model_5.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_con_cal/cmvae_model_20.ckpt'
-weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new_2/cmvae_model_3.ckpt'
+
+# weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new_2/cmvae_model_3.ckpt'
+
 # weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new/cmvae_model_19.ckpt'
 # weights_path = '/home/rb/data/model_outputs/cmvae_real_test_2/cmvae_model_42.ckpt'
 n_z = 10

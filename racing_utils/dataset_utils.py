@@ -145,7 +145,7 @@ def read_images(data_dir, res, max_size=None):
             # reached the last point -- exit loop of images
             break
 
-    print('Done reading images.')
+    print('Done reading {} images.'.format(images_np.shape[0]))
     return images_np
 
 

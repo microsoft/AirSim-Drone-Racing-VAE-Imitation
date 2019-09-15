@@ -7,15 +7,18 @@ import cv2
 
 # files_list = ['/home/rb/data/log/most_2019-09-02-16-37-41.bag']
 print('Going to read file list')
-data_dir = '/home/rb/data/log_2'
+data_dir = '/media/rb/hd_2tb/data/log_3'
 files_list = glob.glob(os.path.join(data_dir, '*.bag'))
-path_save_images = '/home/rb/data/real_life'
+path_save_images = '/home/rb/data/real_life/real_life_run'
 
 bridge = CvBridge()
 img_res = 64
 
 folder_idx = 0
 for file_name in files_list:
+    # if folder_idx < 19:
+    #     folder_idx = folder_idx + 1
+    #     continue
     print('Starting to process bag:' + file_name)
     bag = rosbag.Bag(file_name, 'r')
 
