@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
     offset = [0, 0, -0]
-    noise = 2.0
+    noise = 3.0
     gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=noise, height_range=[0, -noise], track_offset=offset)
 
     # wait till takeoff complete
@@ -114,11 +114,11 @@ if __name__ == "__main__":
     # bc_weights_path = '/home/rb/data/model_outputs/bc_reg/bc_model_80.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
 
-    bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
-    feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
+    # bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
+    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_120.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+    bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_150.ckpt'
+    feature_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
 
     # bc_weights_path = '/home/rb/data/model_outputs/bc_img/bc_model_100.ckpt'
     # feature_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'

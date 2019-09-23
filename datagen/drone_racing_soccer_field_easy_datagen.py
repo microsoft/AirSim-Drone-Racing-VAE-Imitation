@@ -25,14 +25,14 @@ import racing_utils
 
 # DEFINE DATA GENERATION META PARAMETERS
 num_gates_desired = 8
-race_course_radius = 6
-radius_noise = 0
-height_range = [0, -0]
+race_course_radius = 8
+radius_noise = 2
+height_range = [0, -2]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
 perpendicular = False  # if 1, then move with velocity constraint
-vel_max = 0.5
-vel_avg = 0.5
-acc_max = 2.0
+vel_max = 5.0
+vel_avg = 3.5
+acc_max = 3.0
 
 # DEFINE DATA GENERATION META PARAMETERS
 # num_gates = 14
@@ -232,7 +232,7 @@ class DroneRacingDataGenerator(object):
                                                              vel_max=self.vel_max, acc_max=self.acc_max,
                                                              add_curr_odom_position_constraint=True,
                                                              add_curr_odom_velocity_constraint=True,
-                                                             viz_traj=False,
+                                                             viz_traj=True,
                                                              vehicle_name=self.drone_name)
         else:
             gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, self.direction, scale=self.vel_avg)
