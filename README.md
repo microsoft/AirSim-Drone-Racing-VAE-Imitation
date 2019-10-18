@@ -34,7 +34,7 @@ Python packages used by the example provided and their recommended version:
 - matplotlib==2.1.1
 - scikit-learn==0.20.4
 - scipy==1.2.2
-
+- pandas==0.24.2
 
 ## Downloading the drone racing files
 In order for you to train the models and run Airsim you first need to download all image datasets, behavior cloning datasets, network weights and Airsim binaries:  
@@ -44,6 +44,8 @@ In order for you to train the models and run Airsim you first need to download a
 
 ## Training and testing the cross-modal VAE representation
 In order to train the cross-modal representations you can either use the downloaded image dataset from the previous step, or generate the data yourself using Airsim.
+
+![Teaser](figs/arch.png)
 
 ### Training with downloaded dataset
 
@@ -93,15 +95,38 @@ train_bc.py
 ### Generating your own imitation learning dataset with Airsim
 You may want to generate a custom dataset for training you behavior cloning policies. Here are the steps to do it:
 
-- Start the Airsim environment from the binary file:
+- Start the Airsim environment from the binary file (not the same one for generating images for the cross-modal representation!):
 ```
 $ cd /yourpath/all_files/airsim_binaries/recording_env
 $ ./AirSimExe.sh -windowed
 ```
-- If it asks if you want the car model, click 'No'
-- Inside the file 'datagen/action_generator/src/soccer_datagen.py' first change the desired number of samples and saved dataset path
+- Inside the file 'datagen/action_generator/src/soccer_datagen.py' change the desired meta-parameters (number of gates, track radius, gate displacement noise, etc)
 - Run the script for generating data:
 ```
-main.py     # inside datagen/img_generator
+soccer_datagen.py
 ```
-- Once the dataset is generated, follow the previous scripts for training the CM-VAE
+- Once you're satisfied with the motion, turn off trajectory visualization parameter 'viz_traj'. Otherwise the recorded images will show the motion line
+- Once the quad is flying, press 'r' on your keyboard to start recording images. Velocities will be automatically recorded. Both are saved inside '~/Documents/AirSim'
+
+Now you'll need to process the raw recording so that you can match the time-stamps from velocity commands and images into a cohesive dataset. To do it:
+
+- Inside '~/Documents/AirSim', copy the contents of both folders ('moveOnSpline_vel_cmd.txt', 'images' folder and 'images.txt' file) into a new directory, for example '~/all_files/il_datasets/bc_test'.
+- In 'datagen/action_generator/src/data_processor.py', modify variable 'base_path' to '~/all_files/il_datasets/bc_test'. Then run:
+```
+data_processor.py
+```
+- Finally, can train 'train_bc.py' following the previous steps. You can combine different datasets with different noise levels to train the same policy 
+
+## Deploying the trained policies
+Now you can deploy the trained policies in AirSim, following these steps:
+- Start the Airsim environment from correct binary file:
+```
+$ cd /yourpath/all_files/airsim_binaries/vae_env
+$ ./AirSimExe.sh -windowed
+```
+- In file 'imitation_learning/bc_navigation.py', modify 'policy_type' and 'gate_noise'. Then run:
+```
+bc_navigation.py
+```
+
+![Teaser](figs/giphy.gif)

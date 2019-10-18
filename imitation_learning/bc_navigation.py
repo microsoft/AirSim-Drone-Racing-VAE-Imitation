@@ -21,6 +21,16 @@ sys.path.insert(0, models_path)
 import racing_utils
 
 
+###########################################
+
+# DEFINE DEPLOYMENT META PARAMETERS
+
+# policy options: bc_con, bc_unc, bc_img, bc_reg, bc_full
+policy_type = 'bc_reg'
+gate_noise = 1.0
+
+###########################################
+
 def process_image(client, img_res):
     image_response = client.simGetImages([airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]
     img_1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)  # get numpy array
@@ -36,7 +46,7 @@ def move_drone(client, vel_cmd):
     # good multipliers originally: 0.4 for vel, 0.8 for yaw
     # good multipliers new policies: 0.8 for vel, 0.8 for yaw
     vel_cmd[0:2] = vel_cmd[0:2] *1.0  # usually base speed is 3/ms
-    vel_cmd[3] = vel_cmd[3] * 1.1
+    vel_cmd[3] = vel_cmd[3] * 1.0
     # yaw rate is given in deg/s!! not rad/s
     yaw_mode = airsim.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
     client.moveByVelocityAsync(vel_cmd[0], vel_cmd[1], vel_cmd[2], duration=0.1, yaw_mode=yaw_mode)
@@ -75,8 +85,7 @@ if __name__ == "__main__":
     # spawn red gates in appropriate locations
     # gate_poses = racing_utils.trajectory_utils.RedGateSpawner(client, num_gates=1, noise_amp=0)
     offset = [0, 0, -0]
-    noise = 3.0
-    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=noise, height_range=[0, -noise], track_offset=offset)
+    gate_poses = racing_utils.trajectory_utils.RedGateSpawnerCircle(client, num_gates=8, radius=8, radius_noise=gate_noise, height_range=[0, -gate_noise], track_offset=offset)
 
     # wait till takeoff complete
     vel_max = 5.0
@@ -104,29 +113,35 @@ if __name__ == "__main__":
     time.sleep(1.0)
     img_res = 64
 
-    training_mode = 'latent'  # 'full' or 'latent'
-    # training_mode = 'full'  # 'full' or 'latent' or 'reg'
-    # training_mode = 'reg'  # 'full' or 'latent' or 'reg'
+    if policy_type == 'bc_con':
+        training_mode = 'latent'
+        latent_space_constraints = True
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_con/bc_model_120.ckpt'
+        feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+    elif policy_type == 'bc_unc':
+        training_mode = 'latent'
+        latent_space_constraints = False
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_unc/bc_model_120.ckpt'
+        feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_unc/cmvae_model_65.ckpt'
+    elif policy_type == 'bc_img':
+        training_mode = 'latent'
+        latent_space_constraints = True
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_img/bc_model_100.ckpt'
+        feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_img/cmvae_model_45.ckpt'
+    elif policy_type == 'bc_reg':
+        training_mode = 'reg'
+        latent_space_constraints = True
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_reg/bc_model_80.ckpt'
+        feature_weights_path = '/home/rb/all_files/model_outputs/reg/reg_model_25.ckpt'
+    elif policy_type == 'bc_full':
+        training_mode = 'full'
+        latent_space_constraints = True
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_full/bc_model_120.ckpt'
+        feature_weights_path = None
 
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_full/bc_model_100.ckpt'
-    # feature_weights_path = ''
-
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_reg/bc_model_80.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
-
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_unc/bc_model_100.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
-
-    bc_weights_path = '/home/rb/data/model_outputs/bc_con/bc_model_150.ckpt'
-    feature_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
-
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_img/bc_model_100.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
-
-    # bc_weights_path = '/home/rb/data/model_outputs/bc_real/bc_model_100.ckpt'
-    # feature_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'
-
-    vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path, feature_weights_path=feature_weights_path)
+    vel_regressor = vel_regressor.VelRegressor(regressor_type=training_mode, bc_weights_path=bc_weights_path,
+                                               feature_weights_path=feature_weights_path,
+                                               latent_space_constraints=latent_space_constraints)
 
     count = 0
     max_count = 50

@@ -7,7 +7,7 @@ import threading
 
 import os,sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
-airsim_path = os.path.join(curr_dir, '..', 'airsim')
+airsim_path = os.path.join(curr_dir, '..', '..', '..', 'airsim')
 sys.path.insert(0, airsim_path)
 import setup_path
 import airsim
@@ -19,22 +19,23 @@ models_path = os.path.join(curr_dir, '..', 'racing_utils')
 sys.path.insert(0, models_path)
 import racing_utils
 
-random.seed(999)
+random.seed()
 
 ###########################################
 
 # DEFINE DATA GENERATION META PARAMETERS
-num_gates = 8
+num_gates_track = 8
 race_course_radius = 8
-radius_noise = 1
-height_range = [0, -1]
+gate_displacement_noise = 1.0
+viz_traj = True
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
-perpendicular = False  # if 1, then move with velocity constraint
+perpendicular = False  # if True, then move with velocity constraint
 vel_max = 5.0
-acc_max = 10.0
+acc_max = 3.0
 
 ###########################################
-
+radius_noise = gate_displacement_noise
+height_range = [0, -gate_displacement_noise]
 
 class DroneRacingDataGenerator(object):
     def __init__(self, 
@@ -103,7 +104,7 @@ class DroneRacingDataGenerator(object):
         self.client.simLoadLevel(level_name)
         time.sleep(2)
 
-        self.set_current_track_gate_poses_from_default_track_in_binary() # oh-so-specific function for the hackathon
+        self.set_current_track_gate_poses_from_default_track_in_binary()
         self.next_track_gate_poses = self.get_next_generated_track()
 
         for gate_idx in range(len(self.gate_object_names_sorted)):
@@ -111,7 +112,7 @@ class DroneRacingDataGenerator(object):
             self.client.simSetObjectPose(self.gate_object_names_sorted[gate_idx], self.next_track_gate_poses[gate_idx])
             time.sleep(0.05)
 
-        self.set_current_track_gate_poses_from_default_track_in_binary() # oh-so-specific function for the hackathon
+        self.set_current_track_gate_poses_from_default_track_in_binary()
         self.next_track_gate_poses = self.get_next_generated_track()
 
     def set_current_track_gate_poses_from_default_track_in_binary(self):
@@ -121,6 +122,10 @@ class DroneRacingDataGenerator(object):
         gate_indices_bad = [int(gate_name.split('_')[0][4:]) for gate_name in gate_names_sorted_bad]
         gate_indices_correct = sorted(range(len(gate_indices_bad)), key=lambda k:gate_indices_bad[k])
         self.gate_object_names_sorted = [gate_names_sorted_bad[gate_idx] for gate_idx in gate_indices_correct]
+
+        # limit the number of gates in the track
+        self.gate_object_names_sorted = self.gate_object_names_sorted[:num_gates_track]
+
         self.curr_track_gate_poses = [self.client.simGetObjectPose(gate_name) for gate_name in self.gate_object_names_sorted]
 
         # destroy all previous gates in map
@@ -128,20 +133,24 @@ class DroneRacingDataGenerator(object):
             self.client.simDestroyObject(gate_object)
             time.sleep(0.05)
 
+        # generate track with correct number of gates
+        self.next_track_gate_poses = self.get_next_generated_track()
+        self.curr_track_gate_poses = self.next_track_gate_poses
+
         # create red gates in their places
         for idx in range(len(self.gate_object_names_sorted)):
-            self.client.simSpawnObject(self.gate_object_names_sorted[idx], "RedGate16x16", self.curr_track_gate_poses[idx], 1.5)
+            self.client.simSpawnObject(self.gate_object_names_sorted[idx], "RedGate16x16", self.next_track_gate_poses[idx], 0.75)
             time.sleep(0.05)
 
         # for gate_pose in self.curr_track_gate_poses:
         #     print(gate_pose.position.x_val, gate_pose.position.y_val,gate_pose.position.z_val)
 
     def takeoff_with_moveOnSpline(self, takeoff_height, vel_max, acc_max):
-        self.client.moveOnSplineAsync(path=[airsim.Vector3r(0, 0, takeoff_height)],
+        self.client.moveOnSplineAsync(path=[airsim.Vector3r(4, -2, takeoff_height)],
                                       vel_max=vel_max, acc_max=acc_max,
                                       add_curr_odom_position_constraint=True,
                                       add_curr_odom_velocity_constraint=True,
-                                      viz_traj=False,
+                                      viz_traj=viz_traj,
                                       vehicle_name=self.drone_name).join()
 
     def expert_planner_controller_callback(self):
@@ -204,7 +213,7 @@ class DroneRacingDataGenerator(object):
                                                              vel_max=self.vel_max, acc_max=self.acc_max,
                                                              add_curr_odom_position_constraint=True,
                                                              add_curr_odom_velocity_constraint=True,
-                                                             viz_traj=True,
+                                                             viz_traj=viz_traj,
                                                              vehicle_name=self.drone_name)
         else:
             gate_vector = racing_utils.geom_utils.get_gate_facing_vector_from_quaternion(self.curr_track_gate_poses[self.next_gate_idx].orientation, self.direction, scale=vel_max/1.5)
@@ -213,7 +222,7 @@ class DroneRacingDataGenerator(object):
                                                                            vel_max=self.vel_max, acc_max=self.acc_max,
                                                                            add_curr_odom_position_constraint=True,
                                                                            add_curr_odom_velocity_constraint=True,
-                                                                           viz_traj=True,
+                                                                           viz_traj=viz_traj,
                                                                            vehicle_name=self.drone_name)
 
     # maybe maintain a list of futures, or else unreal binary will crash if join() is not called at the end of script
@@ -290,14 +299,14 @@ class DroneRacingDataGenerator(object):
         time.sleep(0.01)
         self.client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains().to_list(), vehicle_name=self.drone_name)
         time.sleep(0.01)
-        self.takeoff_with_moveOnSpline(takeoff_height=-4, vel_max=self.vel_max, acc_max=self.acc_max)
+        self.takeoff_with_moveOnSpline(takeoff_height=-2, vel_max=self.vel_max, acc_max=self.acc_max)
         self.set_num_training_laps(num_training_laps)
         self.start_expert_planner_controller_thread()
 
 
 if __name__ == "__main__":
     drone_racing_datagenerator = DroneRacingDataGenerator(drone_name='drone_0',
-                                                          gate_passed_thresh=2.0,
+                                                          gate_passed_thresh=0.5,
                                                           race_course_radius=race_course_radius,
                                                           radius_noise=radius_noise,
                                                           height_range=height_range,
