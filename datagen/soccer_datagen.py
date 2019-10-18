@@ -24,12 +24,12 @@ random.seed(999)
 ###########################################
 
 # DEFINE DATA GENERATION META PARAMETERS
-num_gates = 14
-race_course_radius = 25
-radius_noise = 3
-height_range = [0, -4]
+num_gates = 8
+race_course_radius = 8
+radius_noise = 1
+height_range = [0, -1]
 direction = 0  # 0 for clockwise, 1 for counter-clockwise
-perpendicular = True  # if 1, then move with velocity constraint
+perpendicular = False  # if 1, then move with velocity constraint
 vel_max = 5.0
 acc_max = 10.0
 
