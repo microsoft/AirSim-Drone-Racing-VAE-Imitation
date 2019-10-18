@@ -110,8 +110,8 @@ soccer_datagen.py
 
 Now you'll need to process the raw recording so that you can match the time-stamps from velocity commands and images into a cohesive dataset. To do it:
 
-- Inside '~/Documents/AirSim', copy the contents of both folders ('moveOnSpline_vel_cmd.txt', 'images' folder and 'images.txt' file) into a new directory, for example '~/all_files/il_datasets/bc_test'.
-- In 'datagen/action_generator/src/data_processor.py', modify variable 'base_path' to '~/all_files/il_datasets/bc_test'. Then run:
+- Inside '/Documents/AirSim', copy the contents of both folders ('moveOnSpline_vel_cmd.txt', 'images' folder and 'images.txt' file) into a new directory, for example '/all_files/il_datasets/bc_test'.
+- In 'datagen/action_generator/src/data_processor.py', modify variable 'base_path' to '/all_files/il_datasets/bc_test'. Then run:
 ```
 data_processor.py
 ```
