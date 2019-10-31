@@ -263,7 +263,7 @@ def create_test_dataset_csv(data_dir, res, read_table=True):
     return images_np, raw_table
 
 
-def create_dataset_txt(data_dir, batch_size, res, data_mode='train'):
+def create_dataset_txt(data_dir, batch_size, res, data_mode='train', base_path=None):
     vel_table = np.loadtxt(data_dir + '/proc_vel.txt', delimiter=',').astype(np.float32)
     with open(data_dir + '/proc_images.txt') as f:
         img_table = f.read().splitlines()
@@ -278,6 +278,8 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train'):
     print('Done. Going to read images.')
     idx = 0
     for img_name in img_table:
+        if base_path is not None:
+            img_name = img_name.replace('/home/rb/data', base_path)
         # read data in BGR format by default!!!
         # notice that model is going to be trained in BGR
         im = cv2.imread(img_name, cv2.IMREAD_COLOR)
@@ -312,12 +314,12 @@ def create_dataset_txt(data_dir, batch_size, res, data_mode='train'):
         return img_test, v_test
 
 
-def create_dataset_multiple_sources(data_dir_list, batch_size, res, data_mode='train'):
+def create_dataset_multiple_sources(data_dir_list, batch_size, res, data_mode='train', base_path=None):
     # load all the images and velocities in one single large dataset
     images_np = np.empty((0,res,res,3)).astype(np.float32)
     vel_table = np.empty((0,4)).astype(np.float32)
     for data_dir in data_dir_list:
-        img_array, v_array = create_dataset_txt(data_dir, batch_size, res, data_mode='test')
+        img_array, v_array = create_dataset_txt(data_dir, batch_size, res, data_mode='test', base_path=base_path)
         images_np = np.concatenate((images_np, img_array), axis=0)
         vel_table = np.concatenate((vel_table, v_array), axis=0)
     # separate the actual dataset:

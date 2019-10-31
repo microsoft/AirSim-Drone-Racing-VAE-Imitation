@@ -16,23 +16,23 @@ import racing_utils
 ###########################################
 
 # DEFINE TRAINING META PARAMETERS
-# data_dir = '/home/rb/data/il_datasets/bc_1'
-# data_dir_list = ['/home/rb/data/il_datasets/bc_1',
-#                  '/home/rb/data/il_datasets/bc_2']
-data_dir_list = ['/home/rb/data/il_datasets/bc_v05_n0',
-                 '/home/rb/data/il_datasets/bc_v05_n1',
-                 '/home/rb/data/il_datasets/bc_v05_n2',
-                 '/home/rb/data/il_datasets/bc_v05_n3']
-output_dir = '/home/rb/data/model_outputs/bc_real_cal_new_2_slow'
+base_path = '/home/rb/all_files'
+data_dir_list = ['/home/rb/all_files/il_datasets/bc_v5_n0',
+                 '/home/rb/all_files/il_datasets/bc_v5_n1',
+                 '/home/rb/all_files/il_datasets/bc_v5_n2',
+                 '/home/rb/all_files/il_datasets/bc_v5_n3']
+output_dir = '/home/rb/all_files/model_outputs/bc_test'
 
 training_mode = 'latent'  # 'full' or 'latent' or 'reg'
+cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
+# cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_unc/cmvae_model_65.ckpt'
+# cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_img/cmvae_model_45.ckpt'
 
-# reg_weights_path = '/home/rb/data/model_outputs/reg/reg_model_25.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_con/cmvae_model_40.ckpt'
-cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real_cal_new_2/cmvae_model_1.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_img/cmvae_model_45.ckpt'
-# cmvae_weights_path = '/home/rb/data/model_outputs/cmvae_real/cmvae_model_40.ckpt'
+# training_mode = 'reg'  # 'full' or 'latent' or 'reg'
+# reg_weights_path = '/home/rb/all_files/model_outputs/reg/reg_model_25.ckpt'
+
+# training_mode = 'full'  # 'full' or 'latent' or 'reg'
+# no auxiliary feature extraction weights
 
 n_z = 10
 batch_size = 32
@@ -101,7 +101,7 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 # load dataset
 print('Starting dataset')
 # train_ds, test_ds = racing_utils.dataset_utils.create_dataset_txt(data_dir, batch_size, img_res, data_mode='train')
-train_ds, test_ds = racing_utils.dataset_utils.create_dataset_multiple_sources(data_dir_list, batch_size, img_res, data_mode='train')
+train_ds, test_ds = racing_utils.dataset_utils.create_dataset_multiple_sources(data_dir_list, batch_size, img_res, data_mode='train', base_path=base_path)
 print('Done with dataset')
 
 # create models
