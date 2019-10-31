@@ -2,16 +2,9 @@ import os
 import sys
 from scipy.spatial.transform import Rotation
 import math
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-
-airsim_path = os.path.join(curr_dir, '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
-
-from airsim.utils import to_eularian_angles, to_quaternion
+from airsimdroneracingvae.utils import to_eularian_angles, to_quaternion
 import numpy as np
-from airsim.types import Pose, Vector3r, Quaternionr
+from airsimdroneracingvae.types import Pose, Vector3r, Quaternionr
 
 
 def interp_vector(a, b, n):
@@ -146,9 +139,9 @@ def get_gate_facing_vector_from_quaternion(airsim_quat, direction, scale=1.0,):
                                 [                0.0,                 0.0,                 0.0, 1.0]])
     gate_facing_vector = rotation_matrix[:-1, 1]
     if direction == 0:
-        return airsim.Vector3r(scale*gate_facing_vector[0], scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+        return airsimdroneracingvae.Vector3r(scale*gate_facing_vector[0], scale*gate_facing_vector[1], scale*gate_facing_vector[2])
     else:
-        return airsim.Vector3r(-scale*gate_facing_vector[0], -scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+        return airsimdroneracingvae.Vector3r(-scale*gate_facing_vector[0], -scale*gate_facing_vector[1], scale*gate_facing_vector[2])
 
 
 

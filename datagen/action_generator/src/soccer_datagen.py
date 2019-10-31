@@ -6,13 +6,9 @@ import numpy as np
 import threading
 
 import os,sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-airsim_path = os.path.join(curr_dir, '..', '..', '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
-import airsim.types
-import airsim.utils
+import airsimdroneracingvae
+import airsimdroneracingvae.types
+import airsimdroneracingvae.utils
 
 # import utils
 models_path = os.path.join(curr_dir, '..', 'racing_utils')
@@ -76,7 +72,7 @@ class DroneRacingDataGenerator(object):
         self.acc_max = acc_max
 
         # todo encapsulate in function
-        self.client = airsim.MultirotorClient()
+        self.client = airsimdroneracingvae.MultirotorClient()
         self.client.confirmConnection()
         self.client.enableApiControl(True, vehicle_name=self.drone_name)
         time.sleep(0.05)
@@ -146,7 +142,7 @@ class DroneRacingDataGenerator(object):
         #     print(gate_pose.position.x_val, gate_pose.position.y_val,gate_pose.position.z_val)
 
     def takeoff_with_moveOnSpline(self, takeoff_height, vel_max, acc_max):
-        self.client.moveOnSplineAsync(path=[airsim.Vector3r(4, -2, takeoff_height)],
+        self.client.moveOnSplineAsync(path=[airsimdroneracingvae.Vector3r(4, -2, takeoff_height)],
                                       vel_max=vel_max, acc_max=acc_max,
                                       add_curr_odom_position_constraint=True,
                                       add_curr_odom_velocity_constraint=True,
@@ -297,7 +293,7 @@ class DroneRacingDataGenerator(object):
         time.sleep(0.01)
         self.client.armDisarm(True, vehicle_name=self.drone_name)
         time.sleep(0.01)
-        self.client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains().to_list(), vehicle_name=self.drone_name)
+        self.client.setTrajectoryTrackerGains(airsimdroneracingvae.TrajectoryTrackerGains().to_list(), vehicle_name=self.drone_name)
         time.sleep(0.01)
         self.takeoff_with_moveOnSpline(takeoff_height=-2, vel_max=self.vel_max, acc_max=self.acc_max)
         self.set_num_training_laps(num_training_laps)
