@@ -22,7 +22,7 @@ import racing_utils
 
 
 class VelRegressor():
-    def __init__(self, regressor_type, bc_weights_path, feature_weights_path=None):
+    def __init__(self, regressor_type, bc_weights_path, feature_weights_path=None, latent_space_constraints=True):
         self.regressor_type = regressor_type
 
         # create models
@@ -30,8 +30,11 @@ class VelRegressor():
             self.bc_model = racing_models.bc_full.BcFull()
             self.bc_model.load_weights(bc_weights_path)
         elif self.regressor_type == 'latent':
-            # self.cmvae_model = racing_models.cmvae.Cmvae(n_z=10, gate_dim=4, res=64, trainable_model=False)
-            self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
+            # create model
+            if latent_space_constraints is True:
+                self.cmvae_model = racing_models.cmvae.CmvaeDirect(n_z=10, gate_dim=4, res=64, trainable_model=False)
+            else:
+                self.cmvae_model = racing_models.cmvae.Cmvae(n_z=10, gate_dim=4, res=64, trainable_model=False)
             self.cmvae_model.load_weights(feature_weights_path)
             self.bc_model = racing_models.bc_latent.BcLatent()
             self.bc_model.load_weights(bc_weights_path)

@@ -215,10 +215,11 @@ if __name__ == "__main__":
     #     args.result_images,
     #     args.images_folder
     # )
+    base_path = '/home/rb/all_files/il_datasets/bc_test'
     run(
-        '/home/rb/data/il_datasets/bc_3/moveOnSpline_vel_cmd.txt',
-        '/home/rb/data/il_datasets/bc_3/images.txt',
-        '/home/rb/data/il_datasets/bc_3/proc_vel.txt',
-        '/home/rb/data/il_datasets/bc_3/proc_images.txt',
-        '/home/rb/data/il_datasets/bc_3/images'
+        os.path.join(base_path, 'moveOnSpline_vel_cmd.txt'),
+        os.path.join(base_path, 'images.txt'),
+        os.path.join(base_path, 'proc_vel.txt'),
+        os.path.join(base_path, 'proc_images.txt'),
+        os.path.join(base_path, 'images')
     )
