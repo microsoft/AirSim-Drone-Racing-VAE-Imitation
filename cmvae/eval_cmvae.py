@@ -3,31 +3,22 @@ import os
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-curr_dir = os.path.dirname(os.path.abspath(__file__))
 
 # imports
+curr_dir = os.path.dirname(os.path.abspath(__file__))
 import_path = os.path.join(curr_dir, '..')
 sys.path.insert(0, import_path)
 import racing_models.cmvae
 import racing_utils
 
-
-###########################################
-
 # DEFINE TESTING META PARAMETERS
 data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
-
-# read_table = False
 read_table = True
-
 latent_space_constraints = True
-
 weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
 
 n_z = 10
 img_res = 64
-
-
 num_imgs_display = 50
 columns = 10
 rows = 10
@@ -38,8 +29,6 @@ idx_far = 1  #39
 
 z_range_mural = [-0.02, 0.02]
 z_num_mural = 11
-
-###########################################
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 # 0 = all messages are logged (default behavior)
@@ -165,7 +154,6 @@ plt.imshow(img_display)
 fig2.savefig(os.path.join('/home/rb/Pictures', 'reconstruction_interpolation_results.png'))
 plt.show()
 
-
 # new plot traveling through latent space
 fig3 = plt.figure(figsize=(96, 96))
 columns = z_num_mural
@@ -184,23 +172,3 @@ for i in range(1, z_num_mural*n_z + 1):
     plt.imshow(img_display)
 fig3.savefig(os.path.join('/home/rb/Pictures', 'z_mural.png'))
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -9,9 +9,6 @@ sys.path.insert(0, import_path)
 import racing_models.cmvae
 import racing_utils
 
-
-###########################################
-
 # DEFINE TRAINING META PARAMETERS
 data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
 output_dir = '/home/rb/all_files/model_outputs/cmvae_con'
@@ -23,10 +20,7 @@ img_res = 64
 max_size = None  # default is None
 learning_rate = 1e-4
 
-###########################################
 # CUSTOM TF FUNCTIONS
-
-
 @tf.function
 def calc_weighted_loss_img(img_recon, images_np):
     flat_pred = tf.reshape(img_recon, [-1])
@@ -37,7 +31,6 @@ def calc_weighted_loss_img(img_recon, images_np):
     loss = tf.reduce_sum(weighted_error_sq)
     return loss
 
-
 def reset_metrics():
     train_loss_rec_img.reset_states()
     train_loss_rec_gate.reset_states()
@@ -45,7 +38,6 @@ def reset_metrics():
     test_loss_rec_img.reset_states()
     test_loss_rec_gate.reset_states()
     test_loss_kl.reset_states()
-
 
 @tf.function
 def regulate_weights(epoch):
@@ -74,10 +66,9 @@ def regulate_weights(epoch):
         w_gate = 1.0
     return beta, w_img, w_gate
 
-
 @tf.function
 def compute_loss_unsupervised(img_gt, gate_gt, img_recon, gate_recon, means, stddev, mode):
-    # copute reconstruction loss
+    # compute reconstruction loss
     if mode == 0:
         img_loss = tf.losses.mean_squared_error(img_gt, img_recon)
         # img_loss = tf.losses.mean_absolute_error(img_gt, img_recon)
@@ -92,7 +83,6 @@ def compute_loss_unsupervised(img_gt, gate_gt, img_recon, gate_recon, means, std
     # print('Lrec: {}'.format(recon_loss))
     # copute KL loss: D_KL(Q(z|X,y) || P(z|X))
     return img_loss, gate_loss, kl_loss
-
 
 @tf.function
 def train(img_gt, gate_gt, epoch, mode):
@@ -133,7 +123,6 @@ def train(img_gt, gate_gt, epoch, mode):
     gradients = tape.gradient(total_loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-
 @tf.function
 def test(img_gt, gate_gt, mode):
     img_recon, gate_recon, means, stddev, z = model(img_gt, mode)
@@ -144,9 +133,6 @@ def test(img_gt, gate_gt, mode):
         test_loss_rec_img.update_state(img_loss)
         test_loss_rec_gate.update_state(gate_loss)
         test_loss_kl.update_state(kl_loss)
-
-###########################################
-
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 # 0 = all messages are logged (default behavior)

@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape, ReLU
 
-
 class BcFull(Model):
     def __init__(self):
         super(BcFull, self).__init__()
@@ -92,4 +91,3 @@ class BcFull(Model):
         self.dense3 = tf.keras.layers.Dense(units=4, activation='linear')
 
         print('[BcFull] Done with model')
-

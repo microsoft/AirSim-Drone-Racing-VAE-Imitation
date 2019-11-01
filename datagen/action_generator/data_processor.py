@@ -7,7 +7,6 @@ from scipy.spatial.transform import Rotation as R
 from scipy.spatial.transform import Slerp
 import numpy as np
 
-
 TIME_COLUMN = 'TimeStamp'
 INTERPOLABLE_VEL_COLUMNS = ['vx', 'vy', 'vz', 'vyaw']
 INTERPOLABLE_QUAT_COLUMNS = ['odom.quaternion.x', 'odom.quaternion.y', 'odom.quaternion.z', 'odom.quaternion.w']
@@ -86,7 +85,6 @@ def interpolate_record(record1, record2, image_record):
 
     return interpolated_vel_body
 
-
 def find_closest_rows(value, iterator):
     v1, v2 = None, None
     r1, r2 = None, None
@@ -100,7 +98,6 @@ def find_closest_rows(value, iterator):
         elif v1 is None and curr_value[TIME_COLUMN] >= value:
             break
     return v1, v2
-
 
 def split_test_training_data(file_paths, lines_number, test_split=0.2):
     test_number = int(lines_number * test_split)
@@ -122,14 +119,12 @@ def split_test_training_data(file_paths, lines_number, test_split=0.2):
         f_test.close()
         os.remove(file_path)
 
-
 def process(
     velocities,
     images,
     result_velocities_file_path,
     result_images_file_path,
-    images_folder_path
-):
+    images_folder_path):
     """
     Process velocities and images frames.
     For each row in images:
@@ -176,14 +171,12 @@ def process(
     f_images.close()
     # split_test_training_data([result_velocities_file_path, result_images_file_path], row_counter)
 
-
 def run(
     velocities_file_path,
     images_file_path,
     result_velocities_file_path,
     result_images_file_path,
-    images_folder_path,
-):
+    images_folder_path):
     velocities = pd.read_csv(velocities_file_path, delimiter=', ')
     images = pd.read_csv(
         images_file_path, delimiter=', ')
@@ -221,6 +214,4 @@ if __name__ == "__main__":
         os.path.join(base_path, 'images.txt'),
         os.path.join(base_path, 'proc_vel.txt'),
         os.path.join(base_path, 'proc_images.txt'),
-        os.path.join(base_path, 'images')
-    )
-
+        os.path.join(base_path, 'images'))

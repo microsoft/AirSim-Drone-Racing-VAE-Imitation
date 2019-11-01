@@ -68,7 +68,6 @@ class Cmvae(Model):
             gate_recon = self.p_gate(z)
             return img_recon, gate_recon
 
-
 # model definition class
 class CmvaeDirect(Model):
     def __init__(self, n_z, gate_dim=4, res=96, trainable_model=True):

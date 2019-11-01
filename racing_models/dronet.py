@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape, ReLU
 
-
 class Dronet(Model):
     def __init__(self, num_outputs, include_top=True):
         super(Dronet, self).__init__()
@@ -96,4 +95,3 @@ class Dronet(Model):
         # self.dense_phi_rel = tf.keras.layers.Dense(units=2, activation='tanh')
 
         print('[Dronet] Done with dronet')
-

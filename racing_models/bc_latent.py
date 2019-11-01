@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape, ReLU
 
-
 class BcLatent(Model):
     def __init__(self):
         super(BcLatent, self).__init__()
@@ -23,6 +22,6 @@ class BcLatent(Model):
             # dense1,
             # dense2,
             dense3,
-            dense4
-        ], name='bc_dense')
+            dense4], 
+            name='bc_dense')
         print('[BcLatent] Done with create_model')

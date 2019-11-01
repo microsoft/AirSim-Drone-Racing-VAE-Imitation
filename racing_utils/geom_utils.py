@@ -6,7 +6,6 @@ from airsimdroneracingvae.utils import to_eularian_angles, to_quaternion
 import numpy as np
 from airsimdroneracingvae.types import Pose, Vector3r, Quaternionr
 
-
 def interp_vector(a, b, n):
     delta = (b-a)/(n-1)
     list_vecs = []
@@ -28,10 +27,8 @@ def randomQuadPose(x_range, y_range, z_range, yaw_range, pitch_range, roll_range
     q_o_b = Quaternionr(q[0], q[1], q[2], q[3])
     return Pose(t_o_b, q_o_b), yaw
 
-
 def randomSample(value_range):
     return (value_range[1] - value_range[0])*np.random.random() + value_range[0]
-
 
 def randomGatePose(p_o_b, phi_base, r_range, cam_fov, correction):
     gate_ok = False
@@ -96,7 +93,6 @@ def debugGatePoses(p_o_b, r, theta, psi):
     p_o_g = Pose(t_o_g, Quaternionr(q[0], q[1], q[2], q[3]))
     return p_o_g, r, theta, psi, phi_rel
 
-
 def polarTranslation(r, theta, psi):
     # follow math convention for polar coordinates
     # r: radius
@@ -107,7 +103,6 @@ def polarTranslation(r, theta, psi):
     z = r * np.cos(psi)
     return Vector3r(x, y, z)
 
-
 def convert_t_body_2_world(t_body, q_o_b):
     rotation = Rotation.from_quat([q_o_b.x_val, q_o_b.y_val, q_o_b.z_val, q_o_b.w_val])
     t_body_np = [t_body.x_val, t_body.y_val, t_body.z_val]
@@ -115,35 +110,35 @@ def convert_t_body_2_world(t_body, q_o_b):
     t_world = Vector3r(t_world_np[0], t_world_np[1], t_world_np[2])
     return t_world
 
-
 def get_yaw_base(p_o_b):
     q_o_b = p_o_b.orientation
     rotation = Rotation.from_quat([q_o_b.x_val, q_o_b.y_val, q_o_b.z_val, q_o_b.w_val])
     euler_angles = rotation.as_euler('ZYX')
     return euler_angles[0]
 
-
-# scale dictates speed!
+# this is utility function to get a velocity constraint which can be passed to moveOnSplineVelConstraints() 
+# the "scale" parameter scales the gate facing vector accordingly, thereby dictating the speed of the velocity constraint
 def get_gate_facing_vector_from_quaternion(airsim_quat, direction, scale=1.0,):
-    q = np.array([airsim_quat.w_val, airsim_quat.x_val, airsim_quat.y_val, airsim_quat.z_val], dtype=np.float64, copy=True)
+    # convert gate quaternion to rotation matrix. 
+    # ref: https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion; https://www.lfd.uci.edu/~gohlke/code/transformations.py.html
+    q = np.array([airsim_quat.w_val, airsim_quat.x_val, airsim_quat.y_val, airsim_quat.z_val], dtype=np.float64)
     n = np.dot(q, q)
-    # todo check for too low floats and return identity
-    # if n < _EPS:
-    #     return np.identity(4)
+    if n < np.finfo(float).eps:
+        if direction == 0:
+            return airsimdroneracingvae.Vector3r(0.0, 1.0, 0.0)
+        else:
+            return airsimdroneracingvae.Vector3r(0.0, -1.0, 0.0)
+
     q *= math.sqrt(2.0 / n)
     q = np.outer(q, q)
-    rotation_matrix =  np.array([
-                                [1.0-q[2, 2]-q[3, 3],     q[1, 2]-q[3, 0],     q[1, 3]+q[2, 0], 0.0],
-                                [    q[1, 2]+q[3, 0], 1.0-q[1, 1]-q[3, 3],     q[2, 3]-q[1, 0], 0.0],
-                                [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2], 0.0],
-                                [                0.0,                 0.0,                 0.0, 1.0]])
-    gate_facing_vector = rotation_matrix[:-1, 1]
+    rotation_matrix = np.array([[1.0-q[2, 2]-q[3, 3],     q[1, 2]-q[3, 0],     q[1, 3]+q[2, 0]],
+                                [    q[1, 2]+q[3, 0], 1.0-q[1, 1]-q[3, 3],     q[2, 3]-q[1, 0]],
+                                [    q[1, 3]-q[2, 0],     q[2, 3]+q[1, 0], 1.0-q[1, 1]-q[2, 2]]])
+    gate_facing_vector = rotation_matrix[:,1]
     if direction == 0:
-        return airsimdroneracingvae.Vector3r(scale*gate_facing_vector[0], scale*gate_facing_vector[1], scale*gate_facing_vector[2])
+        return airsimdroneracingvae.Vector3r(scale * gate_facing_vector[0], scale * gate_facing_vector[1], scale * gate_facing_vector[2])
     else:
-        return airsimdroneracingvae.Vector3r(-scale*gate_facing_vector[0], -scale*gate_facing_vector[1], scale*gate_facing_vector[2])
-
-
+        return airsimdroneracingvae.Vector3r(-scale * gate_facing_vector[0], -scale * gate_facing_vector[1], scale * gate_facing_vector[2])
 
 def getGatePoseWorld(p_o_b, r, theta, psi, phi_rel):
     # get relative vector in the base frame coordinates

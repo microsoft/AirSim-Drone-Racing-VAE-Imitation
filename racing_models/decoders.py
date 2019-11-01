@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Dense, Flatten, Conv2D, BatchNormalization, Lambda, Concatenate, Conv2DTranspose, Reshape, ReLU
 
-
 class ImgDecoder(Model):
     def __init__(self):
         super(ImgDecoder, self).__init__()
@@ -32,8 +31,8 @@ class ImgDecoder(Model):
             deconv3,
             deconv4,
             deconv5,
-            deconv7
-        ], name='p_img')
+            deconv7], 
+            name='p_img')
 
         print('[ImgDecoder] Done with create_model')
 
@@ -57,6 +56,7 @@ class GateDecoder(Model):
             # dense1,
             # dense2,
             # dense3,
-            dense4
-        ], name='p_gate')
+            dense4], 
+            name='p_gate')
+
         print('[GateDecoder] Done with create_model')

@@ -10,8 +10,6 @@ from airsimdroneracingvae.utils import to_eularian_angles, to_quaternion
 
 def MoveCheckeredGates(client):
     gate_names_sorted = sorted(client.simListSceneObjects("Gate.*"))
-    # gate_names_sorted_bad is ['Gate0', 'Gate10_21', 'Gate11_23', 'Gate1_3', 'Gate2_5', 'Gate3_7', 'Gate4_9', 'Gate5_11', 'Gate6_13', 'Gate7_15', 'Gate8_17', 'Gate9_19']
-    # number after underscore is unreal garbage
     pose_far = Pose(Vector3r(0,0,1), Quaternionr())
     for gate in gate_names_sorted:
         client.simSetObjectPose(gate, pose_far)
@@ -59,16 +57,11 @@ def RedGateSpawnerTrack(client, num_gates, radius, radius_noise, height_range, n
 def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, direction, offset=[0,0,0], type_of_segment="circle"):
     if type_of_segment == "circle":
         (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius, radius_noise, direction) for i in range(3)])
-        # todo unreadable code
-        # todo un-hardcode
         # airsimdroneracingvae.Vector3r((x_t[t_i][0] - x_t[0][0]), (y_t[t_i][0] - y_t[0][0]), random.uniform(height_range[0], height_range[1])), \
-        gate_poses = [
-                        airsimdroneracingvae.Pose(
-                            airsimdroneracingvae.Vector3r((x_t[t_i][0]+offset[0]),
-                                        (y_t[t_i][0]+offset[1]),
-                                        random.uniform(height_range[0], height_range[1])+offset[2]),
-                            quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1])
-                      )
+        gate_poses = [airsimdroneracingvae.Pose(airsimdroneracingvae.Vector3r((x_t[t_i][0]+offset[0]),
+                                                  (y_t[t_i][0]+offset[1]),
+                                                    random.uniform(height_range[0], height_range[1])+offset[2]),
+                            quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1]))
                         for t_i in range(num_gates)]
     # elif type_of_segment == "cubic":
     return gate_poses
@@ -82,7 +75,7 @@ def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
             r0.x * dy_dt - r0.y * dx_dt,
             math.sqrt((r0.x**2 + r0.y**2 + r0.z**2) * (dx_dt**2 + dy_dt**2 + dz_dt**2)) + (r0.x * dx_dt + r0.y * dy_dt + r0.z * dz_dt)
         )
-    #Normalize
+    # Normalize
     length = q.get_length()
     if (length == 0.0):
         q.w_val = 1.0

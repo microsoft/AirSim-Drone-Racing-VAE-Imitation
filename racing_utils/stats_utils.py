@@ -51,10 +51,8 @@ def calculate_gate_stats(predictions, poses):
 
     print('bla')
 
-
     # fig, axs = plt.subplots(1, 4, tight_layout=True)
     # N, bins, patches = axs[0].hist(abs_diff[:, 0], bins=100, range=(0,3), density=True)
-
 
     # plt.title("R MAE histogram")
     # _ = plt.hist(abs_diff[:, 0], np.linspace(0.0, 10.0, num=1000))

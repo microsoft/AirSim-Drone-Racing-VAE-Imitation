@@ -4,7 +4,6 @@ import math
 import time
 import numpy as np
 import threading
-
 import os,sys
 import airsimdroneracingvae
 import airsimdroneracingvae.types
@@ -18,8 +17,6 @@ import racing_utils
 
 random.seed()
 
-###########################################
-
 # DEFINE DATA GENERATION META PARAMETERS
 num_gates_track = 8
 race_course_radius = 8
@@ -29,8 +26,6 @@ direction = 0  # 0 for clockwise, 1 for counter-clockwise
 perpendicular = False  # if True, then move with velocity constraint
 vel_max = 5.0
 acc_max = 3.0
-
-###########################################
 radius_noise = gate_displacement_noise
 height_range = [0, -gate_displacement_noise]
 
