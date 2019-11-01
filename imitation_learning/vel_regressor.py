@@ -3,12 +3,7 @@ import numpy as np
 
 import os
 import sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-
-airsim_path = os.path.join(curr_dir, '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
+import airsimdroneracingvae
 
 # import model
 models_path = os.path.join(curr_dir, '..', 'racing_models')
@@ -57,6 +52,6 @@ class VelRegressor():
         predictions = predictions.numpy()
         predictions = racing_utils.dataset_utils.de_normalize_v(predictions)
         # print('Predicted body vel: \n {}'.format(predictions[0]))
-        v_xyz_world = racing_utils.geom_utils.convert_t_body_2_world(airsim.Vector3r(predictions[0,0], predictions[0,1], predictions[0,2]), p_o_b.orientation)
+        v_xyz_world = racing_utils.geom_utils.convert_t_body_2_world(airsimdroneracingvae.Vector3r(predictions[0,0], predictions[0,1], predictions[0,2]), p_o_b.orientation)
         return np.array([v_xyz_world.x_val, v_xyz_world.y_val, v_xyz_world.z_val, predictions[0,3]])
 

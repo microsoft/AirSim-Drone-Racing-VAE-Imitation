@@ -7,13 +7,9 @@ import math
 import tensorflow as tf
 
 import os, sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-airsim_path = os.path.join(curr_dir, '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
-import airsim.types
-import airsim.utils
+import airsimdroneracingvae
+import airsimdroneracingvae.types
+import airsimdroneracingvae.utils
 
 # import utils
 models_path = os.path.join(curr_dir, '..', 'racing_utils')
@@ -32,7 +28,7 @@ gate_noise = 1.0
 ###########################################
 
 def process_image(client, img_res):
-    image_response = client.simGetImages([airsim.ImageRequest('0', airsim.ImageType.Scene, False, False)])[0]
+    image_response = client.simGetImages([airsimdroneracingvae.ImageRequest('0', airsimdroneracingvae.ImageType.Scene, False, False)])[0]
     img_1d = np.fromstring(image_response.image_data_uint8, dtype=np.uint8)  # get numpy array
     img_bgr = img_1d.reshape(image_response.height, image_response.width, 3)  # reshape array to 4 channel image array H X W X 3
     img_resized = cv2.resize(img_bgr, (img_res, img_res)).astype(np.float32)
@@ -48,11 +44,11 @@ def move_drone(client, vel_cmd):
     vel_cmd[0:2] = vel_cmd[0:2] *1.0  # usually base speed is 3/ms
     vel_cmd[3] = vel_cmd[3] * 1.0
     # yaw rate is given in deg/s!! not rad/s
-    yaw_mode = airsim.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
+    yaw_mode = airsimdroneracingvae.YawMode(is_rate=True, yaw_or_rate=vel_cmd[3]*180.0/np.pi)
     client.moveByVelocityAsync(vel_cmd[0], vel_cmd[1], vel_cmd[2], duration=0.1, yaw_mode=yaw_mode)
 
 
-print(os.path.abspath(airsim.__file__))
+print(os.path.abspath(airsimdroneracingvae.__file__))
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
@@ -64,7 +60,7 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 if __name__ == "__main__":
     # set airsim client
-    client = airsim.MultirotorClient()
+    client = airsimdroneracingvae.MultirotorClient()
     client.confirmConnection()
     # client.simLoadLevel('Soccer_Field_Easy')
     client.simLoadLevel('Soccer_Field_Easy')
@@ -76,7 +72,7 @@ if __name__ == "__main__":
     time.sleep(0.01)
     client.armDisarm(True, vehicle_name=drone_name)
     time.sleep(0.01)
-    client.setTrajectoryTrackerGains(airsim.TrajectoryTrackerGains().to_list(), vehicle_name=drone_name)
+    client.setTrajectoryTrackerGains(airsimdroneracingvae.TrajectoryTrackerGains().to_list(), vehicle_name=drone_name)
     time.sleep(0.01)
 
     # destroy all previous gates in map
@@ -93,22 +89,22 @@ if __name__ == "__main__":
 
     time.sleep(1.0)
 
-    # takeoff_position = airsim.Vector3r(25, 7, -1.5)
-    # takeoff_orientation = airsim.Vector3r(.2, -0.9, 0)
+    # takeoff_position = airsimdroneracingvae.Vector3r(25, 7, -1.5)
+    # takeoff_orientation = airsimdroneracingvae.Vector3r(.2, -0.9, 0)
     #
-    # takeoff_position = airsim.Vector3r(25, -7, -1.5)
-    # takeoff_orientation = airsim.Vector3r(-.2, 0.9, 0)
+    # takeoff_position = airsimdroneracingvae.Vector3r(25, -7, -1.5)
+    # takeoff_orientation = airsimdroneracingvae.Vector3r(-.2, 0.9, 0)
 
-    takeoff_position = airsim.Vector3r(5.5, -4, -1.5+offset[2])
-    takeoff_orientation = airsim.Vector3r(0.4, 0.9, 0)
+    takeoff_position = airsimdroneracingvae.Vector3r(5.5, -4, -1.5+offset[2])
+    takeoff_orientation = airsimdroneracingvae.Vector3r(0.4, 0.9, 0)
 
-    # takeoff_position = airsim.Vector3r(0, 0, -2)
-    # takeoff_position = airsim.Vector3r(0, 0, 10)
-    # takeoff_orientation = airsim.Vector3r(1, 0, 0)
+    # takeoff_position = airsimdroneracingvae.Vector3r(0, 0, -2)
+    # takeoff_position = airsimdroneracingvae.Vector3r(0, 0, 10)
+    # takeoff_orientation = airsimdroneracingvae.Vector3r(1, 0, 0)
     # client.plot_tf([takeoff_pose], duration=20.0, vehicle_name=drone_name)
-    # client.moveOnSplineAsync([airsim.Vector3r(0, 0, -3)], vel_max=15.0, acc_max=5.0, vehicle_name=drone_name, viz_traj=True).join()
+    # client.moveOnSplineAsync([airsimdroneracingvae.Vector3r(0, 0, -3)], vel_max=15.0, acc_max=5.0, vehicle_name=drone_name, viz_traj=True).join()
     client.moveOnSplineVelConstraintsAsync([takeoff_position], [takeoff_orientation], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=False).join()
-    # client.moveOnSplineVelConstraintsAsync([airsim.Vector3r(1, 0, 8)], [airsim.Vector3r(1, 0, 0)], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=True)
+    # client.moveOnSplineVelConstraintsAsync([airsimdroneracingvae.Vector3r(1, 0, 8)], [airsimdroneracingvae.Vector3r(1, 0, 0)], vel_max=vel_max, acc_max=acc_max, vehicle_name=drone_name, viz_traj=True)
 
     time.sleep(1.0)
     img_res = 64
@@ -152,7 +148,7 @@ if __name__ == "__main__":
         img_batch_1, cam_pos, cam_orientation = process_image(client, img_res)
         elapsed_time_net = time.time() - start_time
         times_net[count] = elapsed_time_net
-        p_o_b = airsim.types.Pose(cam_pos, cam_orientation)
+        p_o_b = airsimdroneracingvae.types.Pose(cam_pos, cam_orientation)
         vel_cmd = vel_regressor.predict_velocities(img_batch_1, p_o_b)
         # print(vel_cmd)
         # print('Before sending vel cmd')

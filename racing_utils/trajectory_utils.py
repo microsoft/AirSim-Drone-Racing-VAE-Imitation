@@ -3,18 +3,10 @@ import numpy as np
 import random
 import math
 import time
-
-import os, sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
-airsim_path = os.path.join(curr_dir, '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
-import airsim.types
-import airsim.utils
-from airsim.types import Pose, Vector3r, Quaternionr
-from airsim.utils import to_eularian_angles, to_quaternion
-
+import airsimdroneracingvae.types
+import airsimdroneracingvae.utils
+from airsimdroneracingvae.types import Pose, Vector3r, Quaternionr
+from airsimdroneracingvae.utils import to_eularian_angles, to_quaternion
 
 def MoveCheckeredGates(client):
     gate_names_sorted = sorted(client.simListSceneObjects("Gate.*"))
@@ -25,12 +17,10 @@ def MoveCheckeredGates(client):
         client.simSetObjectPose(gate, pose_far)
         # time.sleep(0.05)
 
-
 def AllGatesDestroyer(client):
     for gate_object in client.simListSceneObjects(".*[Gg]ate.*"):
         client.simDestroyObject(gate_object)
         time.sleep(0.05)
-
 
 def RedGateSpawner(client, num_gates, noise_amp):
     gate_poses=[]
@@ -42,14 +32,12 @@ def RedGateSpawner(client, num_gates, noise_amp):
         time.sleep(0.05)
     return gate_poses
 
-
 def RedGateSpawnerCircle(client, num_gates, radius, radius_noise, height_range, track_offset=[0, 0, 0]):
     track = generate_gate_poses(num_gates=num_gates, race_course_radius=radius, radius_noise=radius_noise, height_range=height_range, direction=0, offset=track_offset)
     for idx in range(num_gates):
         # client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 1.5)
         client.simSpawnObject("gate_" + str(idx), "RedGate16x16", track[idx], 0.75)
         time.sleep(0.05)
-
 
 def RedGateSpawnerTrack(client, num_gates, radius, radius_noise, height_range, num_ignore = 0, track_offset=[0, 0, 0]):
     offset_0 = [sum(x) for x in zip(track_offset, [radius, 0, 0])]
@@ -68,16 +56,15 @@ def RedGateSpawnerTrack(client, num_gates, radius, radius_noise, height_range, n
             client.simSpawnObject("gate_" + str(idx) + "track_1", "RedGate16x16", track_1[idx], 0.75)
             time.sleep(0.05)
 
-
 def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_range, direction, offset=[0,0,0], type_of_segment="circle"):
     if type_of_segment == "circle":
         (x_t, y_t, z_t) = tuple([generate_circle(i, num_gates, race_course_radius, radius_noise, direction) for i in range(3)])
         # todo unreadable code
         # todo un-hardcode
-        # airsim.Vector3r((x_t[t_i][0] - x_t[0][0]), (y_t[t_i][0] - y_t[0][0]), random.uniform(height_range[0], height_range[1])), \
+        # airsimdroneracingvae.Vector3r((x_t[t_i][0] - x_t[0][0]), (y_t[t_i][0] - y_t[0][0]), random.uniform(height_range[0], height_range[1])), \
         gate_poses = [
-                        airsim.Pose(
-                            airsim.Vector3r((x_t[t_i][0]+offset[0]),
+                        airsimdroneracingvae.Pose(
+                            airsimdroneracingvae.Vector3r((x_t[t_i][0]+offset[0]),
                                         (y_t[t_i][0]+offset[1]),
                                         random.uniform(height_range[0], height_range[1])+offset[2]),
                             quaternionFromUnitGradient(x_t[t_i][1], y_t[t_i][1], z_t[t_i][1])
@@ -86,11 +73,10 @@ def generate_gate_poses(num_gates, race_course_radius, radius_noise, height_rang
     # elif type_of_segment == "cubic":
     return gate_poses
 
-
 def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
     default_gate_facing_vector = type("", (), dict(x=0, y=1, z=0))()
     r0 = default_gate_facing_vector
-    q = airsim.Quaternionr(
+    q = airsimdroneracingvae.Quaternionr(
             r0.y * dz_dt - r0.z * dy_dt,
             r0.z * dx_dt - r0.x * dz_dt,
             r0.x * dy_dt - r0.y * dx_dt,
@@ -106,7 +92,6 @@ def quaternionFromUnitGradient(dx_dt, dy_dt, dz_dt):
         q.y_val /= length
         q.z_val /= length
     return q
-
 
 def generate_circle(i, num_gates, race_course_radius, radius_amp, direction):
     ts = [t / (num_gates) for t in range(0, num_gates)]
@@ -147,9 +132,3 @@ def generate_circle(i, num_gates, race_course_radius, radius_amp, direction):
             samples[idx] = 0.
             derivatives[idx] = 0.
     return list(zip(samples, derivatives))
-
-
-
-
-
-
