@@ -12,8 +12,9 @@ import airsimdroneracingvae.types
 import airsimdroneracingvae.utils
 
 # import utils
-models_path = os.path.join(curr_dir, '..', 'racing_utils')
-sys.path.insert(0, models_path)
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+import_path = os.path.join(curr_dir, '..')
+sys.path.insert(0, import_path)
 import racing_utils
 
 

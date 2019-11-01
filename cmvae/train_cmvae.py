@@ -3,15 +3,12 @@ import os
 import sys
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 
-# import model
-models_path = os.path.join(curr_dir, '..', 'racing_models')
-sys.path.insert(0, models_path)
+# imports
+import_path = os.path.join(curr_dir, '..')
+sys.path.insert(0, import_path)
 import racing_models.cmvae
-
-# import utils
-models_path = os.path.join(curr_dir, '..', 'racing_utils')
-sys.path.insert(0, models_path)
 import racing_utils
+
 
 ###########################################
 

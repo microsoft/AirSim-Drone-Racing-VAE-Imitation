@@ -3,22 +3,18 @@ import numpy as np
 
 import os
 import sys
-curr_dir = os.path.dirname(os.path.abspath(__file__))
 
-# import airsim
-airsim_path = os.path.join(curr_dir, '..', '..', 'airsim')
-sys.path.insert(0, airsim_path)
-import setup_path
-import airsim
-print(os.path.abspath(airsim.__file__))
-from airsim.types import Pose, Vector3r, Quaternionr
-import airsim.types
-import airsim.utils
+import airsimdroneracingvae as airsim
+# print(os.path.abspath(airsim.__file__))
+from airsimdroneracingvae.types import Pose, Vector3r, Quaternionr
+import airsimdroneracingvae.types
+import airsimdroneracingvae.utils
 import time
 
 # import utils
-models_path = os.path.join(curr_dir, '..', '..', 'racing_utils')
-sys.path.insert(0, models_path)
+curr_dir = os.path.dirname(os.path.abspath(__file__))
+import_path = os.path.join(curr_dir, '..', '..')
+sys.path.insert(0, import_path)
 import racing_utils
 
 GATE_YAW_RANGE = [-np.pi, np.pi]  # world theta gate
