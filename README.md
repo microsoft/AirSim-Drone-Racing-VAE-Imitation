@@ -2,11 +2,9 @@
 
 ![Teaser](figs/main_2_low.png)
 
-This repository provides a code base to evaluate and train models from the paper "*Learning Controls Using Cross-Modal Representations: Bridging Simulation and Reality for Drone Racing*". The original paper and video can be found in the following links:
+This repository provides a code base to evaluate and train models from the paper "*Learning Controls Using Cross-Modal Representations: Bridging Simulation and Reality for Drone Racing*". 
 
-Paper: [https://arxiv.org/abs/1909.06993](https://arxiv.org/abs/1909.06993)
-
-Video: [https://youtu.be/aSugOL0qI44](https://youtu.be/aSugOL0qI44)
+ArXiv pre-print: [https://arxiv.org/abs/1909.06993](https://arxiv.org/abs/1909.06993)
 
 ## License and Citation
 This project is licensed under the terms of the MIT license. By using the software, you are agreeing to the terms of the [license agreement](LICENSE).
