@@ -6,6 +6,8 @@ This repository provides a code base to evaluate and train models from the paper
 
 ArXiv pre-print: [https://arxiv.org/abs/1909.06993](https://arxiv.org/abs/1909.06993)
 
+Paper video: https://youtu.be/aSugOL0qI44
+
 ## License and Citation
 This project is licensed under the terms of the MIT license. By using the software, you are agreeing to the terms of the [license agreement](LICENSE).
 
