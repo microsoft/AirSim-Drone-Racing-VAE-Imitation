@@ -23,7 +23,7 @@ import racing_utils
 # DEFINE DEPLOYMENT META PARAMETERS
 
 # policy options: bc_con, bc_unc, bc_img, bc_reg, bc_full
-policy_type = 'bc_reg'
+policy_type = 'bc_con'
 gate_noise = 1.0
 
 ###########################################
@@ -113,13 +113,13 @@ if __name__ == "__main__":
     if policy_type == 'bc_con':
         training_mode = 'latent'
         latent_space_constraints = True
-        bc_weights_path = '/home/rb/all_files/model_outputs/bc_con/bc_model_120.ckpt'
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_con/bc_model_150.ckpt'
         feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.ckpt'
     elif policy_type == 'bc_unc':
         training_mode = 'latent'
         latent_space_constraints = False
-        bc_weights_path = '/home/rb/all_files/model_outputs/bc_unc/bc_model_120.ckpt'
-        feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_unc/cmvae_model_65.ckpt'
+        bc_weights_path = '/home/rb/all_files/model_outputs/bc_unc/bc_model_150.ckpt'
+        feature_weights_path = '/home/rb/all_files/model_outputs/cmvae_unc/cmvae_model_45.ckpt'
     elif policy_type == 'bc_img':
         training_mode = 'latent'
         latent_space_constraints = True
