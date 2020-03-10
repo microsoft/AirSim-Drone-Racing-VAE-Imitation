@@ -1,12 +1,12 @@
-# Learning Controls Using Cross-Modal Representations: Bridging Simulation and Reality for Drone Racing
+# Learning Visuomotor Policies for Aerial Navigation Using Cross-Modal Representations
 
-![Teaser](figs/main_2_low.png)
+![Teaser](figs/giphy.gif) 
 
-This repository provides a code base to evaluate and train models from the paper "*Learning Controls Using Cross-Modal Representations: Bridging Simulation and Reality for Drone Racing*". 
+This repository provides a code base to evaluate and train models from the paper "*Learning Visuomotor Policies for Aerial Navigation Using Cross-Modal Representations*". 
 
 ArXiv pre-print: [https://arxiv.org/abs/1909.06993](https://arxiv.org/abs/1909.06993)
 
-Paper video: https://youtu.be/aSugOL0qI44
+Paper video: https://youtu.be/VKc3A5HlUU8
 
 ## License and Citation
 This project is licensed under the terms of the MIT license. By using the software, you are agreeing to the terms of the [license agreement](LICENSE).
@@ -14,11 +14,11 @@ This project is licensed under the terms of the MIT license. By using the softwa
 If you use this code in your research, please cite us as follows:
 
 ```
-@article{bonatti2019learning,
-  title={Learning Controls Using Cross-Modal Representations: Bridging Simulation and Reality for Drone Racing},
+@article{bonatti2020learning,
+  title={Learning Visuomotor Policies for Aerial Navigation Using Cross-Modal Representations},
   author={Bonatti, Rogerio and Madaan, Ratnesh and Vineet, Vibhav and Scherer, Sebastian and Kapoor, Ashish},
   journal={arXiv preprint arXiv:1909.06993},
-  year={2019}
+  year={2020}
 }
 ```
 
@@ -84,6 +84,8 @@ main.py     # inside datagen/img_generator
 ## Generating imitation learning data for racing
 In order to train the behavior cloning networks you can either use the downloaded image-action pairs dataset or generate the data yourself using Airsim.
 
+![Teaser](figs/process_low.png)
+
 ### Training with downloaded dataset
 
 - Go to folder `imitation_learning`, and inside file `train_bc.py` edit variables `base_path`, `data_dir_list`, and `output_dir`. By default you will be using downloaded datasets with  0m to 3m of random gate displacement amplitude over a course with 8m of nominal radius
@@ -130,8 +132,9 @@ $ ./AirSimExe.sh -windowed
 bc_navigation.py
 ```
 
-![Teaser](figs/giphy.gif)
+The policies trained in AirSim using the cross-modal representations can transferred directly towards real-world applications. Please check out the paper and video to see more results from real-life deployment.
 
+![](figs/main_lowres.png)
 
 # Contributing
 
