@@ -79,7 +79,7 @@ class PoseSampler:
             self.client.simDestroyObject(gate_object)
             time.sleep(0.05)
         if self.with_gate:
-            self.tgt_name = self.client.simSpawnObject("gate", "RedGate16x16", Pose(position_val=Vector3r(0,0,15)), 1.5)
+            self.tgt_name = self.client.simSpawnObject("gate", "RedGate16x16", Pose(position_val=Vector3r(0,0,15)), 0.75)
             # self.tgt_name = self.client.simSpawnObject("gate", "CheckeredGate16x16", Pose(position_val=Vector3r(0,0,15)))
         else:
             self.tgt_name = "empty_target"
