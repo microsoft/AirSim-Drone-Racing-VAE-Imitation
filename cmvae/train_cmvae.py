@@ -13,7 +13,7 @@ import racing_utils
 data_dir = '/home/rb/all_files/airsim_datasets/soccer_1k'
 output_dir = '/home/rb/all_files/model_outputs/cmvae_con'
 batch_size = 32
-epochs = 10000
+epochs = 50
 n_z = 10
 latent_space_constraints = True
 img_res = 64
