@@ -32,7 +32,7 @@ cmvae_weights_path = '/home/rb/all_files/model_outputs/cmvae_con/cmvae_model_40.
 
 n_z = 10
 batch_size = 32
-epochs = 10000
+epochs = 400
 img_res = 64
 max_size = None  # default is None
 learning_rate = 1e-2  # 1e-2 for latent, 1e-3 for full
