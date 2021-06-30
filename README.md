@@ -39,7 +39,7 @@ Python packages used by the example provided and their recommended version:
 
 ## Downloading the drone racing files
 In order for you to train the models and run Airsim you first need to download all image datasets, behavior cloning datasets, network weights and Airsim binaries:  
-- Download all files and datasets [Drone Racing files v. 1.0](https://drive.google.com/drive/folders/19tFUG8bCg3_d_PeQMDHJQvj-ZBv8Ogs_?usp=sharing)
+- Download all files and datasets [Drone Racing files v. 1.0](https://drive.google.com/drive/folders/1NKk_qmLhBW-coqouHrRBPgUkvV-GntSd?usp=sharing)
 - Extract all individual files in the folders
 - Place the `settings.json` file inside `~/Documents/AirSim` in your computer
 
